@@ -1,0 +1,27 @@
+.navBar {
+  display: flex;
+  gap: 5px;
+  /* background-color: var(--color-primary); */
+  padding: 10px;
+  height: 3rem;
+  /* box-shadow: 0 0 20px rgba(0, 0, 0, 0.8); */
+}
+
+.navBar ul {
+  display: flex;
+  gap: 10px;
+  list-style: none;
+  margin: 0;
+}
+
+.navBar h1 {
+  margin: 0;
+  font-size: 1.8rem;
+}
+
+.navBar span {
+  justify-self: end;
+}
+.navBar span:hover {
+  cursor: pointer;
+}

@@ -1,13 +1,17 @@
-import NavBar from "./components/NavBar";
-
+// import { BrowserRouter, Routes } from "react-router";
 import Home from "./pages/Home";
+import { useEffect } from "react";
 
 function App() {
+  useEffect(() => {
+    document.title = "Moodiify | Home";
+  }, []);
+
   return (
-    <>
-      <NavBar />
-      <Home />
-    </>
+    <Home />
+    // <BrowserRouter>
+    //   <Routes index component={Home}></Routes>
+    // </BrowserRouter>
   );
 }
 
