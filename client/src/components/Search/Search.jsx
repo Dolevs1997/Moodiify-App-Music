@@ -15,6 +15,9 @@ export default function Search() {
       <span className={styles.materialIconsOutlined}>
         <img src="public/image_i.png" />
       </span>
+      <span className={styles.materialSymbolsOutlined}>
+        <img src="public/chat_i.png" />
+      </span>
     </div>
   );
 }
