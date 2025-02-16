@@ -1,5 +1,3 @@
-// import { BrowserRouter, Routes } from "react-router";
-import Home from "./pages/Home";
 import { useEffect } from "react";
 
 function App() {
@@ -8,10 +6,11 @@ function App() {
   }, []);
 
   return (
-    <Home />
-    // <BrowserRouter>
-    //   <Routes index component={Home}></Routes>
-    // </BrowserRouter>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/moodiify" index element={<Home />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 

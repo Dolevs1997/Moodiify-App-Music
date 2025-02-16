@@ -1,7 +1,7 @@
 const express = require("express");
-const genre_controller = require("../controllers/genre_controller");
-const router = express.Router();
+const category_controller = require("../controllers/category_controller");
+const homeRouter = express.Router();
+const { validateToken } = require("../middlewares/SpotifyTokens");
+homeRouter.get("/categories", validateToken, category_controller.getAll);
 
-router.get("/", genre_controller.getGenres);
-
-module.exports = router;
+module.exports = homeRouter;
