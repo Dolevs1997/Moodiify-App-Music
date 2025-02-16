@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import styles from "./Category.module.css";
 
 function Category({ category }) {

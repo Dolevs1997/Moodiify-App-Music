@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useEffect } from "react";
 import axios from "axios";
 import Category from "../Category/Category";
@@ -7,23 +7,26 @@ function Categories() {
   const [categories, setCategories] = useState([]);
   const [showMore, setShowMore] = useState(false);
   let limit = categories.length === 0 ? 6 : categories.length;
-  useEffect(function () {
-    console.log("fetching genres");
-    async function fetchGenres() {
-      const response = await axios.get(
-        `http://10.0.0.25:3001/moodiify/categories?limit=${limit}`,
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
+  useEffect(
+    function () {
+      console.log("fetching genres");
+      async function fetchGenres() {
+        const response = await axios.get(
+          `http://10.0.0.25:3001/moodiify/categories?limit=${limit}`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
 
-      console.log(response.data);
-      setCategories(response.data.categories.items);
-    }
-    fetchGenres();
-  }, []);
+        console.log(response.data);
+        setCategories(response.data.categories.items);
+      }
+      fetchGenres();
+    },
+    [limit]
+  );
 
   async function handleShowCategories() {
     setShowMore(!showMore);
