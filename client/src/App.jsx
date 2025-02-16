@@ -1,6 +1,7 @@
 import { BrowserRouter, Route, Routes } from "react-router";
 import Home from "./pages/Home";
 import { useEffect } from "react";
+import Categories from "./components/Categories/Categories";
 
 function App() {
   useEffect(() => {
@@ -10,7 +11,10 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/moodiify" index element={<Home />} />
+        <Route index element={<Home />} />
+        <Route path="moodiify" element={<Home />}>
+          <Route path="categories" element={<Categories />} />
+        </Route>
       </Routes>
     </BrowserRouter>
   );

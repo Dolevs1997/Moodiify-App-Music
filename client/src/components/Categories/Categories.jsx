@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import axios from "axios";
 import Category from "../Category/Category";
 import styles from "./Categories.module.css";
+import { Link } from "react-router";
 function Categories() {
   const [categories, setCategories] = useState([]);
   const [showMore, setShowMore] = useState(false);
@@ -56,7 +57,9 @@ function Categories() {
             <Category key={category.id} category={category} />
           ))}
       </div>
-      <span onClick={handleShowCategories}>{showMore ? "" : "Show More"}</span>
+      <Link to="categories" className="link" onClick={handleShowCategories}>
+        {showMore ? "" : "Show More"}
+      </Link>
     </>
   );
 }
