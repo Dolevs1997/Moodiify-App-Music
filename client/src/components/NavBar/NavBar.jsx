@@ -1,12 +1,13 @@
+/* eslint-disable react/prop-types */
 import Logo from "../Logo/Logo";
 import Search from "../Search/Search";
 import styles from "./NavBar.module.css";
-function NavBar() {
+function NavBar({ handleFormVisible }) {
   return (
     <nav className={styles.navBar}>
       <ul>
         <Logo />
-        <Search />
+        <Search handleFormVisible={handleFormVisible} />
       </ul>
     </nav>
   );

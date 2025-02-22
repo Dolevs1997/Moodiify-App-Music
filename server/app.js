@@ -1,7 +1,8 @@
 // Description: This file is the entry point of the application.
 
 const express = require("express");
-const homeRouter = require("./routes/homePage_route");
+const homeRouter = require("./src/routes/homePage_route");
+const openaiRouter = require("./src/routes/OpenAI_route");
 const { json, urlencoded } = require("body-parser");
 const cors = require("cors");
 
@@ -15,6 +16,7 @@ const initApp = async () => {
   app.use(urlencoded({ extended: true }));
 
   app.use("/moodiify", homeRouter);
+  app.use("/api", openaiRouter);
 
   return app;
 };

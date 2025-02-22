@@ -1,5 +1,6 @@
+/* eslint-disable react/prop-types */
 import styles from "./Search.module.css";
-export default function Search() {
+export default function Search({ handleFormVisible }) {
   return (
     <div className={styles.searchBar}>
       <input className={styles.search} type="text" placeholder={`Search`} />
@@ -15,7 +16,10 @@ export default function Search() {
       <span className={styles.materialIconsOutlined}>
         <img src="public/image_i.png" />
       </span>
-      <span className={styles.materialSymbolsOutlined}>
+      <span
+        className={styles.materialSymbolsOutlined}
+        onClick={handleFormVisible}
+      >
         <img src="public/chat_i.png" />
       </span>
     </div>

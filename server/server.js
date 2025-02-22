@@ -1,5 +1,3 @@
-// Description: Entry point of the application.
-
 const { createServer } = require("http");
 const initApp = require("./app");
 const port = process.env.PORT || 3000;

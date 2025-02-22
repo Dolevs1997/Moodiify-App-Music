@@ -17,6 +17,7 @@
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "node-fetch": "^3.3.2",
+    "openai": "^4.85.1",
     "server": "file:"
   },
   "devDependencies": {
