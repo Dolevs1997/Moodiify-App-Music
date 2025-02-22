@@ -11,4 +11,19 @@
   text-align: center;
   transition: all 0.3s;
   cursor: pointer;
+  text-size-adjust: calc(1.5rem + 1vw);
+  font-weight: 500;
+  height: 200px;
+  text-transform: capitalize;
+  border: 1px solid var(--color-background-200);
+}
+
+.category:hover {
+  background-color: var(--color-background-200);
+}
+
+.category img {
+  width: 100px;
+  height: 100px;
+  margin-bottom: 10px;
 }

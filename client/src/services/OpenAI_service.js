@@ -1,23 +1,26 @@
-/* eslint-disable no-undef */
 import axios from "axios";
-
-async function getSongSuggestions(text) {
-  console.log(process.env.REACT_APP_OPENAI_API_KEY);
-  console.log(text);
-  const response = await axios.post(
-    "https://api.openai.com/v1/engines/davinci/completions",
-    {
-      prompt: text,
-      max_tokens: 100,
-    },
-    {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.REACT_APP_OPENAI_API_KEY}`,
-      },
-    }
-  );
-  return response.data.choices[0].text;
-}
+const SERVER_URL = import.meta.env.VITE_SERVER_URL;
+const getSongSuggestions = async (text) => {
+  const payload = {
+    text: text,
+    role: "user",
+  };
+  try {
+    const response = await axios.post(
+      `http://${SERVER_URL}/api/openai`,
+      payload,
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    console.log("response: \n", response);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching song suggestions:", error);
+    throw error;
+  }
+};
 
 export { getSongSuggestions };

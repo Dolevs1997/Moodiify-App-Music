@@ -3,17 +3,19 @@ import { useEffect } from "react";
 import axios from "axios";
 import Category from "../Category/Category";
 import styles from "./Categories.module.css";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
+const SERVER_URL = import.meta.env.VITE_SERVER_URL;
 function Categories() {
   const [categories, setCategories] = useState([]);
   const [showMore, setShowMore] = useState(false);
+  const [showLess, setShowLess] = useState(true);
   let limit = categories.length === 0 ? 6 : categories.length;
+  const navigate = useNavigate();
   useEffect(
     function () {
-      console.log("fetching genres");
       async function fetchGenres() {
         const response = await axios.get(
-          `http://10.0.0.25:3001/moodiify/categories?limit=${limit}`,
+          `http://${SERVER_URL}/moodiify/categories?limit=${limit}`,
           {
             headers: {
               "Content-Type": "application/json",
@@ -21,7 +23,6 @@ function Categories() {
           }
         );
 
-        console.log(response.data);
         setCategories(response.data.categories.items);
       }
       fetchGenres();
@@ -29,14 +30,19 @@ function Categories() {
     [limit]
   );
 
-  async function handleShowCategories() {
-    setShowMore(!showMore);
+  async function handleShowCategories(show) {
+    if (show == "show more") {
+      setShowMore(true);
+      setShowLess(false);
+    } else if (show == "show less") {
+      setShowLess(true);
+      setShowMore(false);
+    }
+
     limit = showMore ? 6 : 50;
-    console.log("fetching genres");
-    console.log(limit);
-    console.log(showMore);
+
     const response = await axios.get(
-      `http://10.0.0.25:3001/moodiify/categories?limit=${limit}`,
+      `http://${SERVER_URL}/moodiify/categories?limit=${limit}`,
       {
         headers: {
           "Content-Type": "application/json",
@@ -45,8 +51,13 @@ function Categories() {
     );
 
     setCategories(response.data.categories.items);
+    if (showMore == true && showLess == false) {
+      navigate(-1);
+    }
+    if (showLess == true && showMore == false) {
+      navigate("categories");
+    }
   }
-
   return (
     <>
       <h1>Categories</h1>
@@ -57,9 +68,23 @@ function Categories() {
             <Category key={category.id} category={category} />
           ))}
       </div>
-      <Link to="categories" className="link" onClick={handleShowCategories}>
-        {showMore ? "" : "Show More"}
-      </Link>
+      {!showMore && (
+        <Link
+          className="link"
+          onClick={() => handleShowCategories("show more")}
+        >
+          Show More
+        </Link>
+      )}
+
+      {!showLess && (
+        <Link
+          className="link"
+          onClick={() => handleShowCategories("show less")}
+        >
+          Show less
+        </Link>
+      )}
     </>
   );
 }

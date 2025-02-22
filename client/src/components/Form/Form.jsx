@@ -5,12 +5,14 @@ import { getSongSuggestions } from "../../services/OpenAI_service";
 function Form() {
   const [text, setText] = useState("I want you to generate ");
   const [songSuggestions, setSongSuggestions] = useState([]);
-  console.log(songSuggestions);
   async function handleSubmit(e) {
     e.preventDefault();
     const text = document.getElementById("text").value;
-    const songSuggestions = await getSongSuggestions(text);
-    setSongSuggestions([...songSuggestions]);
+    const response = await getSongSuggestions(text);
+    console.log("response:", response);
+    setSongSuggestions(response);
+
+    console.log("songSuggestions: \n", songSuggestions);
 
     setText("");
   }

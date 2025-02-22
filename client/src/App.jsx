@@ -1,9 +1,10 @@
-import { BrowserRouter, Route, Routes } from "react-router";
+import { BrowserRouter, Route, Routes, Navigate } from "react-router";
 import Home from "./pages/Home";
 import { useEffect } from "react";
 import Categories from "./components/Categories/Categories";
 
 function App() {
+  // const [mySongs, setMySongs] = useState([]);
   useEffect(() => {
     document.title = "Moodiify | Home";
   }, []);
@@ -13,6 +14,7 @@ function App() {
       <Routes>
         <Route index element={<Home />} />
         <Route path="moodiify" element={<Home />}>
+          <Route element={<Navigate to="moodiify" />} />
           <Route path="categories" element={<Categories />} />
         </Route>
       </Routes>

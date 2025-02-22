@@ -2,6 +2,7 @@
   display: grid;
   grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
   justify-content: space-between;
+  align-items: center;
   margin: 0 auto;
   max-width: 1200px;
   padding: 0 20px;
@@ -11,9 +12,4 @@
 span {
   color: var(--color-text-dark);
   font-size: 1.2rem;
-}
-
-span:hover {
-  text-decoration: underline;
-  cursor: pointer;
 }

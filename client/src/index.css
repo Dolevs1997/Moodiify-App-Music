@@ -34,3 +34,7 @@ body {
 .link:hover {
   text-decoration: underline;
 }
+
+.link:visited {
+  color: var(--color-text-dark);
+}
