@@ -12,7 +12,9 @@ const SongSuggestions = async (text) => {
     messages: [
       {
         role: text.role,
-        content: text.text + "only song name - artist name + (year)",
+        content:
+          text.text +
+          "only song name - artist name - year and return it without any other information and not in a numbered list",
       },
     ],
     store: true,
@@ -21,9 +23,8 @@ const SongSuggestions = async (text) => {
 
   const suggestions = completion.choices[0].message.content;
   const songSuggestions = suggestions
-    .split("\n")
-    .filter((suggestion) => suggestion !== "");
-  console.log("songSuggestions: \n", songSuggestions);
+    .substring(suggestions.indexOf("1.").valueOf())
+    .split("\n");
 
   return songSuggestions;
 };

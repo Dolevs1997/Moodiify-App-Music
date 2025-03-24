@@ -1,19 +1,18 @@
+/* eslint-disable react/prop-types */
 import styles from "./Form.module.css";
 import { useState } from "react";
 import { getSongSuggestions } from "../../services/OpenAI_service";
 
-function Form() {
+function Form({ setSongSuggestions, handleFormVisible }) {
   const [text, setText] = useState("I want you to generate ");
-  const [songSuggestions, setSongSuggestions] = useState([]);
+
   async function handleSubmit(e) {
     e.preventDefault();
     const text = document.getElementById("text").value;
     const response = await getSongSuggestions(text);
-    console.log("response:", response);
     setSongSuggestions(response);
 
-    console.log("songSuggestions: \n", songSuggestions);
-
+    handleFormVisible();
     setText("");
   }
 

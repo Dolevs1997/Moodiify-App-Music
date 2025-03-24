@@ -4,7 +4,6 @@ import { useEffect } from "react";
 import Categories from "./components/Categories/Categories";
 
 function App() {
-  // const [mySongs, setMySongs] = useState([]);
   useEffect(() => {
     document.title = "Moodiify | Home";
   }, []);

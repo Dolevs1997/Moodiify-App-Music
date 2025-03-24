@@ -15,7 +15,7 @@ const getSongSuggestions = async (text) => {
         },
       }
     );
-    console.log("response: \n", response);
+    // console.log("response: \n", response);
     return response.data;
   } catch (error) {
     console.error("Error fetching song suggestions:", error);
