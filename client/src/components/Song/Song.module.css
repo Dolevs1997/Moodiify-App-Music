@@ -1,7 +1,12 @@
+h2 {
+  font-size: 1.5rem;
+  margin: 0;
+}
+
 .song {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem;
-  border-bottom: 1px solid #ccc;
+  background-color: aqua;
+  width: 250px;
+  height: 100px;
+  margin-top: 20px;
+  margin-bottom: 20px;
 }
