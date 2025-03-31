@@ -1,5 +1,6 @@
 const dotenv = require("dotenv");
 const OpenAI = require("openai");
+const fs = require("fs");
 dotenv.config();
 
 const openaiAPIKey = process.env.OPENAI_API_KEY;
@@ -29,4 +30,17 @@ const SongSuggestions = async (text) => {
   return songSuggestions;
 };
 
-module.exports = { SongSuggestions };
+const SongSuggestionsVoice = async () => {
+  const transcription = await openai.audio.transcriptions.create({
+    file: fs.createReadStream("/path/to/file/audio.mp3"),
+    model: "gpt-4o-transcribe",
+  });
+  console.log("transcription: ", transcription.text);
+
+  const songSuggestions = await SongSuggestions(transcription.text);
+  console.log("songSuggestions: ", songSuggestions);
+
+  return songSuggestions;
+};
+
+module.exports = { SongSuggestions, SongSuggestionsVoice };
