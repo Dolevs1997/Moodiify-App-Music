@@ -21,13 +21,16 @@
   align-items: center;
   gap: 10px;
 }
-.materialSymbolsOutlined:hover {
-  font-size: 50px;
-}
-.materialIconsOutlined:hover {
-  font-size: 50px;
-}
+
 .searchBar img {
   width: 30px;
   height: 30px;
+}
+.searchBar img:hover {
+  cursor: pointer;
+  transform: scale(1.1);
+  transition: all 0.1s;
+}
+.searchBar img:active {
+  transform: scale(0.9);
 }

@@ -21,7 +21,8 @@
     "mongoose": "^8.13.1",
     "node-fetch": "^3.3.2",
     "openai": "^4.85.1",
-    "server": "file:"
+    "server": "file:",
+    "zod": "^3.24.2"
   },
   "devDependencies": {
     "nodemon": "^3.1.9"

@@ -15,10 +15,13 @@ dotenv.config();
 const initApp = async () => {
   console.log("Initializing app");
   try {
-    mongoose
-      .connect(process.env.DB_CONNECTION)
-      .then(() => console.log("MongoDB connected"))
-      .catch((err) => console.log("MongoDB connection error: ", err));
+    // Connect to MongoDB
+    console.log("Connecting to MongoDB...");
+    mongoose.connect(process.env.DATABASE_URL);
+    const db = mongoose.connection;
+    db.on("error", (error) => console.error(error));
+    db.once("connected", () => console.log("Connected to MongoDB"));
+    // Initialize Express app
     const app = express();
     app.use(cors()); // Enable CORS for all routes
     app.use(json());

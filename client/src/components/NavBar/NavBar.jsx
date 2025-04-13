@@ -1,17 +1,38 @@
 /* eslint-disable react/prop-types */
-import Logo from "../Logo/Logo";
-import Search from "../Search/Search";
 import styles from "./NavBar.module.css";
-function NavBar({ handleFormVisible, handleVoiceSearch }) {
+import { NavLink, useNavigate } from "react-router-dom";
+import axios from "axios";
+import toast, { Toaster } from "react-hot-toast";
+
+function NavBar({ user }) {
+  const navigate = useNavigate();
+  async function handleLogout() {
+    const response = await axios.get(
+      `http://${import.meta.env.VITE_SERVER_URL}/auth/logout`,
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${user.refreshToken}`,
+        },
+      }
+    );
+    if (response.status === 204) {
+      localStorage.removeItem("user");
+      toast.success("Logout successful! Redirecting to login...");
+      setTimeout(() => {
+        navigate("/login");
+      }, 2000);
+    } else {
+      console.error("Logout failed!");
+      toast.error("Logout failed! Please try again.");
+    }
+  }
   return (
-    <nav className={styles.navBar}>
-      <ul>
-        <Logo />
-        <Search
-          handleFormVisible={handleFormVisible}
-          handleVoiceSearch={handleVoiceSearch}
-        />
-      </ul>
+    <nav className={styles.nav}>
+      <Toaster />
+      <NavLink to="/moodiify/login" className="link" onClick={handleLogout}>
+        Logout
+      </NavLink>
     </nav>
   );
 }

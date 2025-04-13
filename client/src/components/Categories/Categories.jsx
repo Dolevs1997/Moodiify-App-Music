@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import { useState } from "react";
 import { useEffect } from "react";
 import axios from "axios";
@@ -5,12 +6,13 @@ import Category from "../Category/Category";
 import styles from "./Categories.module.css";
 import { Link, useNavigate } from "react-router";
 const SERVER_URL = import.meta.env.VITE_SERVER_URL;
-function Categories() {
+function Categories({ user }) {
   const [categories, setCategories] = useState([]);
   const [showMore, setShowMore] = useState(false);
   const [showLess, setShowLess] = useState(true);
   let limit = categories.length === 0 ? 6 : categories.length;
   const navigate = useNavigate();
+
   useEffect(
     function () {
       async function fetchGenres() {
@@ -19,6 +21,7 @@ function Categories() {
           {
             headers: {
               "Content-Type": "application/json",
+              Authorization: `Bearer ${user.token}`,
             },
           }
         );
@@ -27,7 +30,7 @@ function Categories() {
       }
       fetchGenres();
     },
-    [limit]
+    [limit, user.token]
   );
 
   async function handleShowCategories(show) {
@@ -46,16 +49,18 @@ function Categories() {
       {
         headers: {
           "Content-Type": "application/json",
+
+          Authorization: `Bearer ${user.token}`,
         },
       }
     );
 
     setCategories(response.data.categories.items);
     if (showMore == true && showLess == false) {
-      navigate(-1);
+      navigate("/home");
     }
     if (showLess == true && showMore == false) {
-      navigate("categories");
+      navigate("/home/categories");
     }
   }
   return (
