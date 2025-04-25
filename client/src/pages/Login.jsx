@@ -31,16 +31,14 @@ function Login() {
       }
     );
     console.log(response);
-
-    if (response.status === 200) {
+    if (response.status === 401) toast.error("Invalid email or password!");
+    else if (response.status === 200) {
       toast.success("Login successful! Redirecting to home...");
       localStorage.setItem("user", JSON.stringify(response.data));
 
       setTimeout(() => {
         navigate("/home");
       }, 2000);
-    } else if (response.status === 401) {
-      toast.error("Invalid credentials! Please try again.");
     } else toast.error("Login failed! Please try again.");
   }
 

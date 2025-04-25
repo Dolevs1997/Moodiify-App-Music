@@ -52,7 +52,7 @@ const login = async (req, res) => {
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid)
-      return res.status(401).send("UNAUTHORIZED: Invalid password");
+      return res.status(401).json("UNAUTHORIZED: Invalid password");
 
     const tokens = await generateTokens(user);
     res.status(200).json({

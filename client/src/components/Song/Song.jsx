@@ -10,7 +10,8 @@ function Song({ song, user }) {
   const [videoId, setVideoId] = useState("");
   const [regionCode, setRegionCode] = useState("");
   const [videoSong, setVideoSong] = useState("");
-
+  console.log("videoSong", videoSong);
+  console.log("song", song);
   useEffect(
     function () {
       async function fetchSongRecommendations(artist, songName) {
