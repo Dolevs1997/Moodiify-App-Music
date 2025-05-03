@@ -1,0 +1,16 @@
+.playlist {
+  justify-items: center;
+}
+
+.playlist:hover {
+  cursor: pointer;
+  transform: scale(1.05);
+  transition: transform 0.2s ease-in-out;
+}
+
+.playlistImage {
+  width: 100%;
+  height: 100%;
+  border-radius: 10px;
+  object-fit: contain;
+}

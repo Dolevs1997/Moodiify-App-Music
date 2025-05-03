@@ -1,3 +1,5 @@
+const { fetchPlaylists } = require("../services/YouTube_service");
+
 const getAll = async (req, res) => {
   const token = req.token;
   const result = await fetch(
@@ -13,4 +15,18 @@ const getAll = async (req, res) => {
   res.status(200).json(data);
 };
 
-module.exports = { getAll };
+const getById = async (req, res) => {
+  const name = req.query.name;
+  if (!name) {
+    return res
+      .status(400)
+      .json({ error: "Please provide name in query params" });
+  }
+  const result = await fetchPlaylists(name);
+  if (!result) {
+    return res.status(400).json({ error: "No playlists found" });
+  }
+  res.status(200).json(result);
+};
+
+module.exports = { getAll, getById };

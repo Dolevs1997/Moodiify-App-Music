@@ -17,7 +17,7 @@ function Categories({ user }) {
     function () {
       async function fetchGenres() {
         const response = await axios.get(
-          `http://${SERVER_URL}/moodiify/categories?limit=${limit}`,
+          `http://${SERVER_URL}/moodiify/categories/getAll?limit=${limit}`,
           {
             headers: {
               "Content-Type": "application/json",
@@ -30,7 +30,7 @@ function Categories({ user }) {
       }
       fetchGenres();
     },
-    [limit, user.token]
+    [limit, user.token, user]
   );
 
   async function handleShowCategories(show) {
@@ -45,7 +45,7 @@ function Categories({ user }) {
     limit = showMore ? 6 : 50;
 
     const response = await axios.get(
-      `http://${SERVER_URL}/moodiify/categories?limit=${limit}`,
+      `http://${SERVER_URL}/moodiify/categories/getAll?limit=${limit}`,
       {
         headers: {
           "Content-Type": "application/json",
@@ -70,7 +70,11 @@ function Categories({ user }) {
         {categories
           .sort((a, b) => a.name.localeCompare(b.name))
           .map((category) => (
-            <Category key={category.id} category={category} />
+            <Category
+              key={category.id}
+              category={category}
+              token={user.token}
+            />
           ))}
       </div>
       {!showMore && (

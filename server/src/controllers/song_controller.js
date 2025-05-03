@@ -3,6 +3,7 @@ dotenv.config();
 const API_KEY = process.env.YOUTUBE_API_KEY;
 const { identify } = require("../services/MusicRecognition_service"); // assuming you move acr helper to utils
 const defaultOptions = require("../config/acr_config"); // your ACRCloud keys
+const { fetchPlaylistSongs } = require("../services/YouTube_service"); // assuming you move acr helper to utils
 const getById = async (req, res) => {
   console.log("query", req.query);
   const { videoId, regionCode } = req.query;
@@ -48,4 +49,13 @@ const recognizeAudio = async (req, res) => {
   });
 };
 
-module.exports = { getById, recognizeAudio };
+const getAll = async (req, res) => {
+  const playlistId = req.query.id;
+  const result = await fetchPlaylistSongs(playlistId);
+  if (!result) {
+    return res.status(400).json({ error: "No playlist songs found" });
+  }
+  res.status(200).json(result);
+};
+
+module.exports = { getById, recognizeAudio, getAll };

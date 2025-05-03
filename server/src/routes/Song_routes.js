@@ -17,4 +17,6 @@ router.post(
   songController.recognizeAudio
 );
 
+router.get("/playlist", authenticate, songController.getAll);
+
 module.exports = router;
