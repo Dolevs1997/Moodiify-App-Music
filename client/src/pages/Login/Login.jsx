@@ -1,8 +1,8 @@
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
-import Button from "../components/Button/Button";
+import Button from "../../components/Button/Button";
 import { useState } from "react";
-import toast, { Toaster } from "react-hot-toast";
+import { Toaster, toast } from "react-hot-toast";
 import axios from "axios";
 
 const SERVER_URL = import.meta.env.VITE_SERVER_URL;
@@ -10,36 +10,40 @@ function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
+
   async function handleLogin(e) {
     e.preventDefault();
+
     if (!email || !password) {
       toast.error("Please fill in all fields");
       return;
     }
-    const payload = {
-      email: email,
-      password: password,
-    };
-
-    const response = await axios.post(
-      `http://${SERVER_URL}/auth/login`,
-      payload,
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
+    try {
+      const payload = {
+        email: email,
+        password: password,
+      };
+      const response = await axios.post(
+        `http://${SERVER_URL}/auth/login`,
+        payload,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      console.log("response", response);
+      if (response.status === 200) {
+        toast.success("Login successful! Redirecting to home...");
+        localStorage.setItem("user", JSON.stringify(response.data));
+        setTimeout(() => {
+          navigate("/home");
+        }, 2000); // Redirect after 2 seconds
       }
-    );
-    console.log("response", response);
-
-    if (response.status === 200) {
-      toast.success("Login successful! Redirecting to home...");
-      localStorage.setItem("user", JSON.stringify(response.data));
-
-      setTimeout(() => {
-        navigate("/home");
-      }, 2000);
-    } else toast.error("Login failed! Please try again.");
+    } catch (error) {
+      console.error("Login error", error);
+      toast.error("Login failed! Please try again.");
+    }
   }
 
   return (

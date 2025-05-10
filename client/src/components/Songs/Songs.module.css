@@ -1,11 +1,13 @@
-.songsContainer {
+:global(.songsContainer) {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr;
-  justify-content: center;
-  align-items: center;
-  gap: 2rem;
+  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+  gap: 30px;
   margin: 0 auto;
-  padding: 2rem;
-  max-width: 1200px;
-  margin-top: 5rem;
+  padding: 20px;
+  align-items: center;
+  width: 100%;
+}
+
+.boxSongs {
+  justify-items: center;
 }

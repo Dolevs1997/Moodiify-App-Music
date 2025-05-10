@@ -4,7 +4,6 @@ import { useNavigate } from "react-router";
 
 function PlaylistCategory({ playlist, token }) {
   const navigate = useNavigate();
-  console.log("token", token);
   return (
     <div
       className={styles.playlist}

@@ -19,7 +19,8 @@
     "react-hot-toast": "^2.5.2",
     "react-native-dotenv": "^3.4.11",
     "react-router": "^7.1.5",
-    "react-router-dom": "^7.4.1"
+    "react-router-dom": "^7.4.1",
+    "react-toastify": "^11.0.5"
   },
   "devDependencies": {
     "@eslint/js": "^9.17.0",

@@ -11,3 +11,10 @@
   align-items: center;
   width: 100%;
 }
+
+.header {
+  align-items: center;
+  justify-content: space-between;
+  display: flex;
+  padding: 10px;
+}

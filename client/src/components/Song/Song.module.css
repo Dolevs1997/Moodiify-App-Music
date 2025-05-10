@@ -19,3 +19,14 @@
   background-color: var(--color-background-900);
   transition: background-color 0.3s ease, box-shadow 0.3s ease;
 }
+
+.addBtn {
+  margin-top: 10px;
+  padding: 5px 10px;
+  border-radius: 5px;
+  background-color: var(--color-primary-500);
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}

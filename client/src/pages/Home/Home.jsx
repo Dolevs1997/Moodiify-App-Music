@@ -1,14 +1,13 @@
-import styles from "./Home.module.css";
-import Categories from "../components/Categories/Categories";
-import Logo from "../components/Logo/Logo";
-import Search from "../components/Search/Search";
+import Categories from "../../components/Categories/Categories";
+import Logo from "../../components/Logo/Logo";
+import Search from "../../components/Search/Search";
 import { useEffect, useState } from "react";
-import Form from "../components/Form/Form";
-import Songs from "../components/Songs/Songs";
+import Form from "../../components/Form/Form";
+import Songs from "../../components/Songs/Songs";
 import axios from "axios";
-import NavBar from "../components/NavBar/NavBar";
+import NavBar from "../../components/NavBar/NavBar";
 import { useNavigate } from "react-router-dom";
-import startRecognition from "../utils/recognization_song";
+import startRecognition from "../../utils/recognization_song";
 let mediaRecorder;
 let audioChunks = [];
 export default function Home() {
@@ -136,8 +135,8 @@ export default function Home() {
   const handleFormVisible = () => setFormVisible(!formVisible);
 
   return (
-    <main className={styles.homeContainer}>
-      <section className={styles.upperSection}>
+    <main className="homeContainer">
+      <section className="header">
         <Logo />
         {!isLoading && !error && (
           <Search

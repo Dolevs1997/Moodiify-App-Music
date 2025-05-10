@@ -5,19 +5,19 @@ function Songs({ songSuggestions, user }) {
   return (
     <div>
       {songSuggestions.length > 1 ? (
-        <>
+        <div className={styles.boxSongs}>
           <h2>Song Suggestions</h2>
           <ul className={styles.songsContainer}>
             {songSuggestions.map((song, index) => (
               <Song key={index} song={song} user={user} />
             ))}
           </ul>
-        </>
+        </div>
       ) : (
-        <>
+        <div className={styles.boxSongs}>
           <h2>Song Record Audio</h2>
           <Song song={songSuggestions[0]} user={user} />
-        </>
+        </div>
       )}
     </div>
   );

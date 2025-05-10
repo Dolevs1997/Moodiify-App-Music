@@ -1,21 +1,20 @@
 // import styles from "./SongsPlaylist.module.css";
 import { useParams, useLocation } from "react-router";
 import { useEffect, useState } from "react";
-import styles from "../components/Songs/Songs.module.css";
-import Song from "../components/Song/Song";
-// import NavBar from "../components/NavBar/NavBar";
-// import Logo from "../components/Logo/Logo";
-// import Search from "../components/Search/Search";
+import Song from "../../components/Song/Song";
+import Logo from "../../components/Logo/Logo";
+import Search from "../../components/Search/Search";
+import NavBar from "../../components/NavBar/NavBar";
 // import { useNavigate } from "react-router-dom";
 function SongsPlaylist() {
   const { playlistId } = useParams();
   const location = useLocation();
-  const { playlistName, token } = location.state || {};
+  const { playlistName } = location.state || {};
   const [playlist, setPlaylist] = useState([]);
-  // const user = JSON.parse(localStorage.getItem("user"));
-  console.log("Playlist data:", playlist);
-  console.log("Playlist ID:", playlistId);
-  console.log("Playlist Name:", playlistName);
+  const user = localStorage.getItem("user")
+    ? JSON.parse(localStorage.getItem("user"))
+    : null;
+  // console.log("playlist", playlist);
   useEffect(() => {
     const fetchPlaylist = async () => {
       try {
@@ -27,7 +26,7 @@ function SongsPlaylist() {
             method: "GET",
             headers: {
               "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
+              Authorization: `Bearer ${user.token}`,
             },
           }
         );
@@ -42,20 +41,23 @@ function SongsPlaylist() {
     };
 
     fetchPlaylist();
-  }, [playlistId, token]);
+  }, [playlistId, user]);
   return (
-    <div>
+    <div className="homeContainer">
+      <div className="header">
+        <Logo />
+        <Search />
+        <NavBar user={user} />
+      </div>
       <h2>{playlistName}</h2>
       <div className="playlist-songs">
         {playlist.length > 0 ? (
-          <ul className={styles.songsContainer}>
-            {playlist.map((song, index) => (
-              <Song
-                key={index}
-                song={song.title}
-                user={JSON.parse(localStorage.getItem("user"))}
-              />
-            ))}
+          <ul className="songsContainer">
+            {playlist
+              .filter((song) => song.title.includes("-"))
+              .map((song, index) => (
+                <Song song={song.title} user={user} key={index} />
+              ))}
           </ul>
         ) : (
           <p>No songs found in this playlist.</p>
