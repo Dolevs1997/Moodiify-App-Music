@@ -1,6 +1,7 @@
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const User = require("../schemas/User_schema");
+const Playlist = require("../schemas/Playlist_schema");
 const { userSchemaZod } = require("../schemas/User_schema");
 
 const register = async (req, res) => {
@@ -22,6 +23,7 @@ const register = async (req, res) => {
       name: username,
       email: email,
       password: encryptedPassword,
+      playlists: [],
       refreshTokens: [],
     });
     const newUser = await user.save();
@@ -47,9 +49,9 @@ const generateTokens = async (user) => {
 const login = async (req, res) => {
   const { email, password } = req.body;
   try {
-    const user = await User.findOne({ email: email });
+    const user = await User.findOne({ email: email }).populate("playlists");
+    console.log("user", user);
     if (!user) return res.status(404).send("NOT FOUND: User does not exist");
-
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid)
       return res.status(401).json("UNAUTHORIZED: Invalid password");
@@ -60,7 +62,7 @@ const login = async (req, res) => {
       email: user.email,
       _id: user._id,
       password: user.password,
-
+      playlists: user.playlists,
       ...tokens,
     });
   } catch (error) {

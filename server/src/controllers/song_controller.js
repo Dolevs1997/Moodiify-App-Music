@@ -5,6 +5,8 @@ const { identify } = require("../services/MusicRecognition_service"); // assumin
 const defaultOptions = require("../config/acr_config"); // your ACRCloud keys
 const { fetchPlaylistSongs } = require("../services/YouTube_service"); // assuming you move acr helper to utils
 const getById = async (req, res) => {
+  const controller = new AbortController();
+  const signal = controller.signal;
   console.log("query", req.query);
   const { videoId, regionCode } = req.query;
   if (!videoId) {
@@ -13,7 +15,8 @@ const getById = async (req, res) => {
       .json({ error: "Please provide videoId in query params" });
   }
   const result = await fetch(
-    `https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${videoId}&regionCode=${regionCode}&key=${API_KEY}`
+    `https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${videoId}&regionCode=${regionCode}&key=${API_KEY}`,
+    { signal }
   );
   const data = await result.json();
   res.status(200).json(data);

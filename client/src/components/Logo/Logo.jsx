@@ -3,7 +3,9 @@ import { useNavigate } from "react-router";
 export default function Logo() {
   const navigate = useNavigate();
   const handleLogoClick = () => {
+    // Navigate to the home page when the logo is clicked
     navigate("/home");
+    window.location.reload();
   };
   return (
     <div onClick={handleLogoClick}>

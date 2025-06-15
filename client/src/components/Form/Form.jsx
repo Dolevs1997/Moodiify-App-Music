@@ -2,18 +2,23 @@
 import styles from "./Form.module.css";
 import { useState } from "react";
 import { getSongSuggestions } from "../../services/OpenAI_service";
-
+import { useNavigate } from "react-router";
 function Form({ setSongSuggestions, handleFormVisible }) {
   const [text, setText] = useState("I want you to generate ");
+  const navigate = useNavigate();
 
   async function handleSubmit(e) {
     e.preventDefault();
     const text = document.getElementById("text").value;
     const response = await getSongSuggestions(text);
     setSongSuggestions(response);
-
     handleFormVisible();
     setText("");
+    if (response.length === 0) {
+      alert("No song suggestions found. Please try again.");
+    } else {
+      navigate("songSuggestions");
+    }
   }
 
   function handleChange(e) {

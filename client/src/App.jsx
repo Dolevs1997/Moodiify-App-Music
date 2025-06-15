@@ -14,20 +14,23 @@ function App() {
   return (
     <BrowserRouter basename="/moodiify">
       <Routes>
-        {/* Redirect the base URL to the login page */}
         <Route path="/" element={<Navigate to="/login" />} />
-        <Route path="/categories" element={<Navigate to="/home" />} />
-        <Route path="/category/playlists" element={<CategoryPlaylists />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
 
+        <Route
+          path="/category/playlists"
+          element={<CategoryPlaylists />}
+        ></Route>
         <Route
           path="/category/playlists/:playlistId/songs"
           element={<SongsPlaylist />}
         />
-        <Route path="/login" element={<Login />} />
         <Route path="/home" element={<Home />}>
           <Route path="categories" element={<Navigate to="/home" />} />
+          <Route path="songSuggestions" element={<Navigate to="/home" />} />
         </Route>
-        <Route path="/register" element={<Register />} />
+
         <Route path="*" element={<ErrorPage />} />
       </Routes>
     </BrowserRouter>

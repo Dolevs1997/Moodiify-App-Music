@@ -27,6 +27,12 @@ const userSchema = new mongoose.Schema({
     type: [String],
     required: false,
   },
+  playlists: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Playlist",
+    },
+  ],
   createdAt: {
     type: Date,
     default: Date.now,

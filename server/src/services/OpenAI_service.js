@@ -9,13 +9,14 @@ const SongSuggestions = async (text) => {
   console.log("text: ", text);
 
   const completion = await openai.chat.completions.create({
-    model: "gpt-4o",
+    model: "gpt-4.1",
+
     messages: [
       {
         role: text.role,
         content:
           text.text +
-          "only song name - artist name - year and return it without any other information and not in a numbered list",
+          "only artist name - song name - year. return it without any other information and not in a numbered list",
       },
     ],
     store: true,

@@ -7,6 +7,7 @@ const recommendRouter = require("./src/routes/Recommends_routes");
 const songRouter = require("./src/routes/Song_routes");
 const openaiRouter = require("./src/routes/OpenAI_route");
 const authRouter = require("./src/routes/Auth_routes");
+const playlistRouter = require("./src/routes/playlist_routes");
 const cors = require("cors");
 const { json, urlencoded } = require("body-parser");
 const dotenv = require("dotenv");
@@ -30,6 +31,7 @@ const initApp = async () => {
     app.use("/moodiify/recommends", recommendRouter);
     app.use("/moodiify/categories", categoriesRouter);
     app.use("/moodiify/videoSong", songRouter);
+    app.use("/moodiify/playlist", playlistRouter);
     app.use("/api", openaiRouter);
 
     return app;

@@ -24,15 +24,19 @@ export default function Home() {
 
   useEffect(() => {
     const user = localStorage.getItem("user");
+
+    setIsLoading(true);
+
     if (!user) {
-      setError("User not found. Please login.");
       setIsLoading(false);
+      setError("User not authenticated. Please log in.");
       navigate("/login");
+      return;
     }
-
-    setUserData(JSON.parse(user));
-
     setIsLoading(false);
+    if (user) {
+      setUserData(JSON.parse(user));
+    }
   }, [navigate]);
   async function handleVoiceSearch() {
     console.log("Voice search activated");
@@ -135,7 +139,7 @@ export default function Home() {
   const handleFormVisible = () => setFormVisible(!formVisible);
 
   return (
-    <main className="homeContainer">
+    <main className="home">
       <section className="header">
         <Logo />
         {!isLoading && !error && (
@@ -148,21 +152,22 @@ export default function Home() {
         )}
         <NavBar user={userData} />
       </section>
-
-      {!isLoading && !error && (
-        <>
-          {formVisible && (
-            <Form
-              setSongSuggestions={setSongSuggestions}
-              handleFormVisible={handleFormVisible}
-            />
-          )}
-          {songSuggestions.length == 0 && <Categories user={userData} />}
-          {songSuggestions.length > 0 && isRecording === false && (
-            <Songs songSuggestions={songSuggestions} user={userData} />
-          )}
-        </>
-      )}
+      <div className="homeContainer">
+        {!isLoading && !error && (
+          <>
+            {formVisible && (
+              <Form
+                setSongSuggestions={setSongSuggestions}
+                handleFormVisible={handleFormVisible}
+              />
+            )}
+            {songSuggestions.length == 0 && <Categories user={userData} />}
+            {songSuggestions.length > 0 && isRecording === false && (
+              <Songs songSuggestions={songSuggestions} user={userData} />
+            )}
+          </>
+        )}
+      </div>
     </main>
   );
 }

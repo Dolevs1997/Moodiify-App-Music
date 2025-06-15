@@ -3,31 +3,38 @@ dotenv.config();
 const API_KEY = process.env.YOUTUBE_API_KEY;
 
 async function fetchPlaylists(playlistName) {
+  const controller = new AbortController();
+  const signal = controller.signal;
   const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=23&q=${playlistName} music playlists&regionCode=IL&type=playlist&key=${API_KEY}`;
   console.log("Fetching playlists from URL:", url);
-  const response = await fetch(url);
+  try {
+    const response = await fetch(url, { signal });
+    const data = await response.json();
+    return data.items.map((item) => ({
+      id: item.id.playlistId,
+      title: item.snippet.title,
+      description: item.snippet.description,
+      thumbnail: item.snippet.thumbnails.default.url,
+      publishedAt: item.snippet.publishedAt,
+    }));
+  } catch (error) {
+    console.error("Error fetching playlists:", error);
+    throw new Error("Failed to fetch playlists");
+  }
   // if (!response.ok) {
   //   throw new Error(`Error fetching playlists: ${response.statusText}`);
   // }
-  const data = await response.json();
-  if (!data || !data.items) {
-    throw new Error("No playlists found");
-  }
-  if (data.items.length === 0) {
-    throw new Error("No playlists found");
-  }
-  return data.items.map((item) => ({
-    id: item.id.playlistId,
-    title: item.snippet.title,
-    description: item.snippet.description,
-    thumbnail: item.snippet.thumbnails.default.url,
-    publishedAt: item.snippet.publishedAt,
-  }));
 }
 
 async function fetchPlaylistSongs(playlistId) {
+  if (!playlistId) {
+    throw new Error("Playlist ID is required");
+  }
+  const controller = new AbortController();
+  const signal = controller.signal;
+
   const url = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=50&playlistId=${playlistId}&key=${API_KEY}`;
-  const response = await fetch(url);
+  const response = await fetch(url, { signal });
   if (!response.ok) {
     throw new Error(`Error fetching playlist songs: ${response.statusText}`);
   }

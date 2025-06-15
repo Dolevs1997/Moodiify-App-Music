@@ -43,7 +43,7 @@ function SongsPlaylist() {
     fetchPlaylist();
   }, [playlistId, user]);
   return (
-    <div className="homeContainer">
+    <main className="homeContainer">
       <div className="header">
         <Logo />
         <Search />
@@ -63,7 +63,7 @@ function SongsPlaylist() {
           <p>No songs found in this playlist.</p>
         )}
       </div>
-    </div>
+    </main>
   );
 }
 
