@@ -7,7 +7,7 @@ function Songs({ songSuggestions, user }) {
       {songSuggestions.length > 1 ? (
         <div className={styles.boxSongs}>
           <h2>Song Suggestions</h2>
-          <ul className={styles.songsContainer}>
+          <ul>
             {songSuggestions.map((song, index) => (
               <Song key={index} song={song} user={user} />
             ))}

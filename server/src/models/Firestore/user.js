@@ -1,0 +1,112 @@
+import {
+  addDoc,
+  collection,
+  getDocs,
+  query,
+  where,
+  updateDoc,
+  doc,
+  arrayUnion,
+} from "firebase/firestore";
+import { db } from "../../config/firebase_config.js"; // Import the Firestore database instance
+import { addPlaylistsUser, getPlaylistUser } from "./playlistsUser.js"; // Import the function to add playlists user
+
+const addUser = async (name, email) => {
+  try {
+    const existingUser = await getUser(email); // Check if the user already exists
+    if (existingUser) {
+      console.log("User already exists with this email:", email);
+      return { error: "User already exists with this email" };
+    }
+    const docRef = await addDoc(collection(db, "user"), {
+      createdAt: new Date(),
+      name: name,
+      email: email,
+      playlists: [],
+    });
+    // console.log("docRef", docRef);
+    console.log("User added with ID: ", docRef.id);
+    return docRef; // Return the document reference or ID
+  } catch (error) {
+    console.error("Error adding user:", error);
+  }
+};
+
+const getUser = async (email) => {
+  try {
+    const userQuery = query(
+      collection(db, "user"),
+      where("email", "==", email) // Query to find user by email
+    );
+    const querySnapshot = await getDocs(userQuery);
+    if (querySnapshot.empty) {
+      console.log("No user found with this email:", email);
+      return null; // Return null if no user is found
+    }
+    let userData = null;
+    querySnapshot.forEach((doc) => {
+      userData = { id: doc.id, ...doc.data() };
+    });
+    return userData;
+  } catch (error) {
+    console.error("Error getting user:", error);
+    return { error: "Error getting user" };
+  }
+};
+const updateUser = async (email, newPlaylist, newSong) => {
+  // console.log("Updating user with email:", email);
+  console.log("New playlist in user.js:", newPlaylist);
+  // console.log("New song:", newSong);
+  const user = await getUser(email);
+  if (!user) {
+    console.log("User not found with this email in firestore:", email);
+    return { error: "User not found" };
+  }
+  try {
+    const userRef = doc(db, "user", user.id); // Get the document reference
+    const existingPlaylist = await getPlaylistUser(
+      newPlaylist.name,
+      userRef // Use the user reference to find the playlist
+    );
+    if (existingPlaylist) {
+      console.log(
+        "Playlist already exists for this user in Firestore:",
+        newPlaylist.name
+      );
+      // If the playlist already exists, add the song to the existing playlist
+      await updateDoc(existingPlaylist.id, {
+        songs: arrayUnion(newSong), // Add the new song to the existing playlist
+      });
+      return { success: true };
+    }
+    const newPlaylistRef = await addPlaylistsUser(
+      newPlaylist,
+      newSong,
+      userRef
+    ); // Add the new playlist and song to Firestore
+    if (newPlaylistRef.error) {
+      console.error(
+        "Error adding playlist user in user.js:",
+        newPlaylistRef.error
+      );
+      return { error: "Error adding playlist user" };
+    }
+    console.log("New playlist added for user:", newPlaylistRef.id);
+    // Update the user's playlists with the new playlist reference
+    await updateDoc(userRef, {
+      playlists: arrayUnion(newPlaylistRef),
+    });
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error updating user:", error);
+    return { error: "Error updating user" };
+  }
+};
+
+const deleteUser = async (email) => {
+  // Implement the logic to delete a user by email from Firestore
+  // This is a placeholder function
+};
+
+export { addUser, getUser, updateUser, deleteUser }; // Export the functions for use in other parts of the application

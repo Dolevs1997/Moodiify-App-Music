@@ -1,9 +1,8 @@
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const User = require("../schemas/User_schema");
-const Playlist = require("../schemas/Playlist_schema");
 const { userSchemaZod } = require("../schemas/User_schema");
-
+const { addUser, getUser } = require("../models/Firestore/user");
 const register = async (req, res) => {
   const { username, email, password } = req.body;
   try {
@@ -26,6 +25,12 @@ const register = async (req, res) => {
       playlists: [],
       refreshTokens: [],
     });
+    // Add user to Firestore
+    const firestoreUser = await addUser(username, email);
+    console.log("firestoreUser", firestoreUser.id);
+    if (firestoreUser.error) {
+      return res.status(409).send("CONFLICT: " + firestoreUser.error);
+    }
     const newUser = await user.save();
     res.status(200).send(newUser);
   } catch (error) {
@@ -52,6 +57,19 @@ const login = async (req, res) => {
     const user = await User.findOne({ email: email }).populate("playlists");
     console.log("user", user);
     if (!user) return res.status(404).send("NOT FOUND: User does not exist");
+    const isEmailValid = await userSchemaZod.safeParse({
+      name: user.name,
+      email: user.email,
+      password: user.password,
+    });
+    if (!isEmailValid.success)
+      return res.status(400).send("BAD REQUEST: Invalid user data");
+    const userFirestore = await getUser(email);
+    if (!userFirestore)
+      return res
+        .status(404)
+        .send("NOT FOUND: User does not exist in Firestore");
+
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid)
       return res.status(401).json("UNAUTHORIZED: Invalid password");
@@ -83,6 +101,7 @@ const logout = async (req, res) => {
       if (err) return res.sendStatus(403);
       const foundUser = await User.findById(user.id);
       if (!foundUser) return res.sendStatus(401);
+
       foundUser.refreshTokens = foundUser.refreshTokens.filter(
         (token) => token !== refreshToken
       );

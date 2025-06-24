@@ -1,12 +1,3 @@
-:global(.songsContainer) {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
-  padding: 20px;
-  max-width: 1500px;
-  gap: 30px;
-  align-items: center;
-}
-
 .boxSongs {
   justify-items: center;
 }

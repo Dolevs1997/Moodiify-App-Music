@@ -16,7 +16,8 @@ function Song({ song, user }) {
   const [videoId, setVideoId] = useState("");
   const [regionCode, setRegionCode] = useState("");
   const [videoSong, setVideoSong] = useState("");
-  //console.log("user", user);
+  const [playlists, setPlaylists] = useState([]);
+  // console.log("user", user);
 
   // console.log("videoSong", videoSong);
 
@@ -25,13 +26,17 @@ function Song({ song, user }) {
   }
   if (!user.playlists) {
     user.playlists = [];
+    localStorage.setItem("user", JSON.stringify(user));
+    console.log("No playlists found, initializing user.playlists");
   }
-
+  if (user.playlists.length === 0) {
+    user.playlists = [];
+  }
   async function handleAddSongToPlaylist(playlistName) {
-    console.log("songName", songName);
-    console.log("artist", artist);
+    // console.log("songName", songName);
+    // console.log("artist", artist);
 
-    console.log("playlistName", playlistName);
+    // console.log("playlistName", playlistName);
     try {
       const response = await axios.post(
         `http://${import.meta.env.VITE_SERVER_URL}/moodiify/playlist/create`,
@@ -56,17 +61,20 @@ function Song({ song, user }) {
         user.playlists = [];
       }
       user.playlists.push({
-        id: response.data.id,
-        name: response.data.playlist,
+        id: response.data.playlist.id,
+        name: response.data.playlist.name,
       });
+      console.log("user playlists", user.playlists);
+      setPlaylists(user.playlists);
+      console.log("Playlists updated:", playlists);
 
       console.log("Updated user playlists:", user.playlists);
       localStorage.setItem("user", JSON.stringify(user));
-      setPlaylistName("");
       setOptions(false);
     } catch (error) {
       console.error("Error adding song to playlist:", error);
     }
+    setPlaylistName("");
   }
   useEffect(
     function () {
@@ -86,7 +94,7 @@ function Song({ song, user }) {
           );
 
           const data = response.data;
-          console.log("data", data);
+          // console.log("data", data);
           setVideoId(() => data.items[0].id.videoId);
           setRegionCode(() => data.regionCode);
         } catch (error) {
@@ -110,7 +118,6 @@ function Song({ song, user }) {
           setVideoSong(songVideo);
           setVideoId("");
           setRegionCode("");
-          console.log("songVideo", songVideo);
         }
       }
       fetchSong();
@@ -137,8 +144,8 @@ function Song({ song, user }) {
               onChange={(e) => setPlaylistName(e.target.value)}
             >
               <option value="">Select Playlist</option>
-              {user.playlists.length > 0 ? (
-                user.playlists.map((playlist, index) => (
+              {playlists.length > 0 ? (
+                playlists.map((playlist, index) => (
                   <option key={index} value={playlist.name}>
                     {playlist.name}
                   </option>

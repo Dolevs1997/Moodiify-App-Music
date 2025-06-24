@@ -1,15 +1,13 @@
 const PlaylistSchema = require("../schemas/Playlist_schema");
 const UserSchema = require("../schemas/User_schema");
 const SongSchema = require("../schemas/Song_schema");
+const { updateUser } = require("../models/Firestore/user");
+
 const createPlaylist = async (req, res) => {
   const { songName, artist, playlistName, user } = req.body;
-  console.log("request body:", req.body);
-  // console.log("Creating playlist with title:", songName);
-  // console.log("Creating playlist with artist:", artist);
-  // console.log("Creating playlist with playlistName:", playlistName);
-  // console.log("Creating playlist with user:", user);
   try {
     const userId = user._id; // Assuming you have the user ID from the authentication middleware
+    let newPlaylist;
 
     // Check if the user exists
     const existingUser = await UserSchema.findById(userId);
@@ -22,44 +20,72 @@ const createPlaylist = async (req, res) => {
       name: playlistName,
       user: userId,
     });
-    if (existingPlaylist) {
-      return res.status(400).json({ message: "Playlist already exists" });
-    }
 
+    // Check if the song already exists for the user
     const existingSong = await SongSchema.findOne({
       title: songName,
       artist: artist,
-    });
-    if (existingSong) {
-      return res.status(400).json({ message: "Song already exists" });
-    }
-    // Create a new song
-    const newSong = new SongSchema({
-      title: songName,
-      artist: artist,
-    });
-    await newSong.save();
-
-    // Create a new playlist
-    const newPlaylist = new PlaylistSchema({
-      name: playlistName,
       user: userId,
-      songs: [newSong._id], // Add the song to the playlist
     });
-    await newPlaylist.save();
+    console.log("Existing song:", existingSong);
+    let newSong;
+    if (!existingSong) {
+      // Create a new song if it doesn't exist
+      newSong = new SongSchema({
+        title: songName,
+        artist: artist,
+        user: userId,
+      });
+      await newSong.save();
+    }
+    console.log("New song:", newSong);
+    // If the song already exists, use the existing song
+    if (existingSong) {
+      newSong = existingSong; // Use the existing song
+    }
+    // Create a new playlist
+    if (existingPlaylist) {
+      // If the playlist already exists, add the song to the existing playlist
+      existingPlaylist.songs.push(newSong._id); // Add the song to the existing playlist
+      await existingPlaylist.save();
+    }
+    // If the playlist does not exist, create a new one
+    else if (!existingPlaylist) {
+      console.log("Creating new playlist:", playlistName);
 
-    // Add the playlist to the user's playlists
-    existingUser.playlists.push(newPlaylist);
-    await existingUser.save();
-    console.log("User updated with new playlist:", existingUser);
-    console.log("name playlist:", newPlaylist.name);
-    return res.status(201).json({
-      message: "Playlist created successfully",
-      playlist: newPlaylist.name,
-      id: newPlaylist._id,
+      // Create a new playlist
+      newPlaylist = new PlaylistSchema({
+        name: playlistName,
+        user: userId,
+        songs: [newSong._id], // Add the song to the new playlist
+      });
+      await newPlaylist.save();
+      console.log("New playlist created:", newPlaylist);
+      // Add the playlist to the user's playlists
+      existingUser.playlists.push(newPlaylist);
+      await existingUser.save();
+    }
+
+    ///////////////////////////////////
+    const firestoreUpdate = await updateUser(
+      existingUser.email,
+      { name: playlistName, user: userId },
+      newSong
+    );
+    if (firestoreUpdate.error) {
+      console.error("Error updating user in Firestore:", firestoreUpdate.error);
+      return res
+        .status(500)
+        .json({ message: "Error updating user in Firestore" });
+    }
+    const playlist = newPlaylist || existingPlaylist;
+    console.log("Playlist after update:", playlist);
+    return res.status(200).json({
+      message: "Song added to existing playlist successfully",
+      playlist: playlist,
     });
   } catch (error) {
-    console.error("Error creating playlist:", error);
+    console.error("Error creating playlist in playlist_controller:", error);
     return res.status(500).json({ message: "Internal server error" });
   }
 };
