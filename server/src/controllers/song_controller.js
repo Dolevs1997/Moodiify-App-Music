@@ -7,7 +7,6 @@ const { fetchPlaylistSongs } = require("../services/YouTube_service"); // assumi
 const getById = async (req, res) => {
   const controller = new AbortController();
   const signal = controller.signal;
-  console.log("query", req.query);
   const { videoId, regionCode } = req.query;
   if (!videoId) {
     return res

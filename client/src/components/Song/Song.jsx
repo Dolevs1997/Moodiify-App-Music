@@ -16,7 +16,6 @@ function Song({ song, user }) {
   const [videoId, setVideoId] = useState("");
   const [regionCode, setRegionCode] = useState("");
   const [videoSong, setVideoSong] = useState("");
-  const [playlists, setPlaylists] = useState([]);
   // console.log("user", user);
 
   // console.log("videoSong", videoSong);
@@ -60,15 +59,27 @@ function Song({ song, user }) {
       if (!Array.isArray(user.playlists)) {
         user.playlists = [];
       }
-      user.playlists.push({
-        id: response.data.playlist.id,
-        name: response.data.playlist.name,
-      });
-      console.log("user playlists", user.playlists);
-      setPlaylists(user.playlists);
-      console.log("Playlists updated:", playlists);
 
-      console.log("Updated user playlists:", user.playlists);
+      // Check if the playlist already exists
+      const existingPlaylist = user.playlists.find(
+        (playlist) => playlist.name === response.data.playlist.name
+      );
+      if (existingPlaylist) {
+        // If it exists, update the playlist ID
+        user.playlists = user.playlists.map((playlist) =>
+          playlist.name === response.data.playlist.name
+            ? { ...playlist, id: response.data.playlist.id }
+            : playlist
+        );
+      } else {
+        user.playlists.push({
+          id: response.data.playlist.id,
+          name: response.data.playlist.name,
+        });
+      }
+
+      console.log("user playlists", user.playlists);
+
       localStorage.setItem("user", JSON.stringify(user));
       setOptions(false);
     } catch (error) {
@@ -130,7 +141,12 @@ function Song({ song, user }) {
     <div className="homeContainer">
       <span
         className={styles.addBtn}
-        onClick={() => setOptions((prev) => !prev, console.log("user", user))}
+        onClick={() =>
+          setOptions(
+            (prev) => !prev,
+            console.log("user playlist", user.playlists)
+          )
+        }
       >
         ➕
         {options && (
@@ -144,8 +160,8 @@ function Song({ song, user }) {
               onChange={(e) => setPlaylistName(e.target.value)}
             >
               <option value="">Select Playlist</option>
-              {playlists.length > 0 ? (
-                playlists.map((playlist, index) => (
+              {user.playlists.length > 0 ? (
+                user.playlists.map((playlist, index) => (
                   <option key={index} value={playlist.name}>
                     {playlist.name}
                   </option>

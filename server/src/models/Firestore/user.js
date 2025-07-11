@@ -10,6 +10,7 @@ import {
 } from "firebase/firestore";
 import { db } from "../../config/firebase_config.js"; // Import the Firestore database instance
 import { addPlaylistsUser, getPlaylistUser } from "./playlistsUser.js"; // Import the function to add playlists user
+import { addSongsUser } from "./songsUser.js"; // Import the function to add songs user
 
 const addUser = async (name, email) => {
   try {
@@ -25,7 +26,6 @@ const addUser = async (name, email) => {
       playlists: [],
     });
     // console.log("docRef", docRef);
-    console.log("User added with ID: ", docRef.id);
     return docRef; // Return the document reference or ID
   } catch (error) {
     console.error("Error adding user:", error);
@@ -54,36 +54,37 @@ const getUser = async (email) => {
   }
 };
 const updateUser = async (email, newPlaylist, newSong) => {
-  // console.log("Updating user with email:", email);
-  console.log("New playlist in user.js:", newPlaylist);
-  // console.log("New song:", newSong);
   const user = await getUser(email);
   if (!user) {
     console.log("User not found with this email in firestore:", email);
     return { error: "User not found" };
   }
   try {
-    const userRef = doc(db, "user", user.id); // Get the document reference
-    const existingPlaylist = await getPlaylistUser(
-      newPlaylist.name,
-      userRef // Use the user reference to find the playlist
-    );
+    console.log("Updating user:", user.id);
+    const userRef = doc(db, "user", user.id);
+    // get playlist if it exists
+    const existingPlaylist = await getPlaylistUser(newPlaylist.name, userRef);
+    // If the playlist already exists, add the song to the existing playlist
     if (existingPlaylist) {
       console.log(
         "Playlist already exists for this user in Firestore:",
         newPlaylist.name
       );
       // If the playlist already exists, add the song to the existing playlist
-      await updateDoc(existingPlaylist.id, {
-        songs: arrayUnion(newSong), // Add the new song to the existing playlist
+
+      const newSongRef = await addSongsUser(newSong, userRef); // Add the new song to Firestore
+      await updateDoc(doc(db, "playlists-user", existingPlaylist.id), {
+        songs: arrayUnion(newSongRef), // Add the new song reference to the existing playlist
       });
+
       return { success: true };
     }
+    // If the playlist does not exist, create a new one
     const newPlaylistRef = await addPlaylistsUser(
       newPlaylist,
       newSong,
       userRef
-    ); // Add the new playlist and song to Firestore
+    );
     if (newPlaylistRef.error) {
       console.error(
         "Error adding playlist user in user.js:",
@@ -91,10 +92,11 @@ const updateUser = async (email, newPlaylist, newSong) => {
       );
       return { error: "Error adding playlist user" };
     }
-    console.log("New playlist added for user:", newPlaylistRef.id);
     // Update the user's playlists with the new playlist reference
+    console.log("Adding new playlist to user:", newPlaylistRef.id);
+    console.log("User reference:", userRef.id);
     await updateDoc(userRef, {
-      playlists: arrayUnion(newPlaylistRef),
+      playlists: arrayUnion(newPlaylistRef), // Add the new playlist reference to the user's playlists
     });
 
     return { success: true };

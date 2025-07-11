@@ -10,13 +10,14 @@ const SongSuggestions = async (text) => {
 
   const completion = await openai.chat.completions.create({
     model: "gpt-4.1",
+    temperature: 0.9,
 
     messages: [
       {
         role: text.role,
         content:
           text.text +
-          "only artist name - song name - year. return it without any other information and not in a numbered list",
+          "only artist name - song name - year. return it without any other information and not in a numbered list. I want you to act like a music expert and I want the songs will be accurate as possible to the mood.",
       },
     ],
     store: true,
