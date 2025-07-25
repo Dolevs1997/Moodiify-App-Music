@@ -1,4 +1,13 @@
-import { addDoc, collection, getDocs, query, where } from "firebase/firestore";
+import {
+  addDoc,
+  collection,
+  getDocs,
+  query,
+  where,
+  doc,
+  deleteDoc,
+  getDoc,
+} from "firebase/firestore";
 import { db } from "../../config/firebase_config.js";
 
 const addSongsUser = async (songUser, userRef) => {
@@ -57,4 +66,19 @@ const getSongUser = async (songName, artist, userRef) => {
   }
 };
 
-export { addSongsUser, getSongUser };
+const deleteSongUser = async (songId) => {
+  try {
+    const songRef = doc(db, "songs-user", songId);
+    const songDoc = await getDoc(songRef);
+    if (!songDoc.exists()) {
+      console.log("No song found with ID:", songId);
+      return;
+    }
+    await deleteDoc(songRef);
+    console.log("Song deleted successfully:", songId);
+  } catch (error) {
+    console.error("Error deleting song user:", error);
+  }
+};
+
+export { addSongsUser, getSongUser, deleteSongUser };

@@ -68,12 +68,12 @@ function Song({ song, user }) {
         // If it exists, update the playlist ID
         user.playlists = user.playlists.map((playlist) =>
           playlist.name === response.data.playlist.name
-            ? { ...playlist, id: response.data.playlist.id }
+            ? { ...playlist, id: response.data.playlist._id }
             : playlist
         );
       } else {
         user.playlists.push({
-          id: response.data.playlist.id,
+          id: response.data.playlist._id,
           name: response.data.playlist.name,
         });
       }

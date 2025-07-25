@@ -10,5 +10,11 @@ router.post(
   validateToken,
   playlistController.createPlaylist
 );
+router.get(
+  "/",
+  authenticate,
+  validateToken,
+  playlistController.getPlaylistSongs
+);
 
 module.exports = router;

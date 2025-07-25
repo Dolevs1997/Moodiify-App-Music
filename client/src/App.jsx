@@ -6,6 +6,9 @@ import { useEffect } from "react";
 import Register from "./pages/Register/Register";
 import SongsPlaylist from "./pages/SongsPlaylist/SongsPlaylist";
 import ErrorPage from "./pages/ErrorPage/ErrorPage";
+import SongsPlaylistUser from "./pages/SongsPlaylistUser/SongsPlaylistUser";
+import "bootstrap/dist/css/bootstrap.min.css";
+
 function App() {
   useEffect(() => {
     document.title = "Moodiify | Home";
@@ -26,6 +29,12 @@ function App() {
           path="/category/playlists/:playlistId/songs"
           element={<SongsPlaylist />}
         />
+
+        <Route
+          path="/myplaylists/:playlistId"
+          element={<SongsPlaylistUser />}
+        />
+
         <Route path="/home" element={<Home />}>
           <Route path="categories" element={<Navigate to="/home" />} />
           <Route path="songSuggestions" element={<Navigate to="/home" />} />

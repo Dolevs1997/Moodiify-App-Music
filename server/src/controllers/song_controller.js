@@ -4,6 +4,8 @@ const API_KEY = process.env.YOUTUBE_API_KEY;
 const { identify } = require("../services/MusicRecognition_service"); // assuming you move acr helper to utils
 const defaultOptions = require("../config/acr_config"); // your ACRCloud keys
 const { fetchPlaylistSongs } = require("../services/YouTube_service"); // assuming you move acr helper to utils
+const SongSchema = require("../schemas/Song_schema"); // Import the Song schema
+const PlaylistSchema = require("../schemas/Playlist_schema"); // Import the Playlist schema
 const getById = async (req, res) => {
   const controller = new AbortController();
   const signal = controller.signal;
@@ -60,4 +62,19 @@ const getAll = async (req, res) => {
   res.status(200).json(result);
 };
 
-module.exports = { getById, recognizeAudio, getAll };
+const deletebyId = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const song = await SongSchema.findByIdAndDelete(id);
+    if (!song) {
+      return res.status(404).json({ message: "Song not found" });
+    }
+    // Remove the song from all playlists
+    await PlaylistSchema.updateMany({ songs: id }, { $pull: { songs: id } });
+    res.status(200).json({ message: "Song deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting song:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+module.exports = { getById, recognizeAudio, getAll, deletebyId };

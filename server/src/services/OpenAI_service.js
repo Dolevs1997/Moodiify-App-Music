@@ -17,7 +17,7 @@ const SongSuggestions = async (text) => {
         role: text.role,
         content:
           text.text +
-          "only artist name - song name - year. return it without any other information and not in a numbered list. I want you to act like a music expert and I want the songs will be accurate as possible to the mood.",
+          "only artist name - song name - year. return it without any other information and not in a numbered list.",
       },
     ],
     store: true,

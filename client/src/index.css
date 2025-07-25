@@ -11,13 +11,12 @@
 
 body {
   font-family: "Roboto", sans-serif;
-  color: var(--color-text);
-  background-color: var(--color-background-900);
+  color: var(--color-text) !important;
+  background-color: var(--color-background-900) !important;
   padding: 10px;
   font-size: 1.2rem;
   line-height: 1.6;
 }
-
 .link {
   color: var(--color-text);
   font-size: 1.2rem;
