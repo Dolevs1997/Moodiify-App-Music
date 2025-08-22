@@ -8,6 +8,7 @@ import axios from "axios";
 import NavBar from "../../components/NavBar/NavBar";
 import { useNavigate } from "react-router-dom";
 import startRecognition from "../../utils/recognization_song";
+
 let mediaRecorder;
 let audioChunks = [];
 export default function Home() {
@@ -77,7 +78,7 @@ export default function Home() {
   async function startRecording() {
     console.log("Recording started");
     setIsRecording(true);
-
+    event.preventDefault();
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
     mediaRecorder = new MediaRecorder(stream);
     mediaRecorder.ondataavailable = (event) => {
@@ -95,11 +96,6 @@ export default function Home() {
       const formData = new FormData();
       formData.append("file", audioBlob, "sample.wav");
       console.log("Recording stopped");
-      // console.log("Sending audio file to server...");
-      // console.log("Audio file:", audioBlob);
-      // console.log("Form data:", formData.get("file"));
-      // console.log("User token:", userData.token);
-      // console.log("Server URL:", import.meta.env.VITE_SERVER_URL);
       const res = await fetch(
         `http://${
           import.meta.env.VITE_SERVER_URL
@@ -114,7 +110,7 @@ export default function Home() {
       );
 
       const data = await res.json();
-      console.log(data);
+      console.log(data.metadata);
       if (data.error) {
         console.error("Error:", data.error);
         return;

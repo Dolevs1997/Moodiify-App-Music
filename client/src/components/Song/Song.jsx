@@ -1,25 +1,55 @@
 /* eslint-disable react/prop-types */
 import styles from "./Song.module.css";
-import { useState } from "react";
-import { useEffect } from "react";
+import { useState, useEffect, useReducer } from "react";
 import axios from "axios";
-import { fetchVideoSong } from "../../services/YouTube_service";
+// import { fetchVideoSong } from "../../services/YouTube_service";
 import { useNavigate } from "react-router";
 import Button from "../Button/Button";
+const initialSong = {
+  videoId: "",
+  title: "",
+  artist: "",
+  regionCode: "",
+  loading: true,
+  error: null,
+};
+function reducer(state, action) {
+  console.log("Reducer action:", action);
+  switch (action.type) {
+    case "LOADING_SONG":
+      return {
+        ...state,
+        loading: true,
+      };
+
+    case "SET_VIDEO_SONG":
+      return {
+        ...state,
+        videoId: action.payload.videoId,
+        title: action.payload.title,
+        artist: action.payload.artist,
+        regionCode: action.payload.regionCode,
+        loading: false,
+      };
+    case "SET_ERROR":
+      return {
+        ...state,
+        error: action.payload.error,
+      };
+    default:
+      return state;
+  }
+}
+
 function Song({ song, user }) {
   const navigate = useNavigate();
   const songName = song.split(" - ")[1];
   const artist = song.split(" - ")[0];
   const [playlistName, setPlaylistName] = useState("");
   const [options, setOptions] = useState(false);
+  const [state, dispatch] = useReducer(reducer, initialSong);
 
-  const [videoId, setVideoId] = useState("");
-  const [regionCode, setRegionCode] = useState("");
-  const [videoSong, setVideoSong] = useState("");
-  // console.log("user", user);
-
-  // console.log("videoSong", videoSong);
-
+  // console.log("state", state);
   if (!user.token) {
     navigate("/login");
   }
@@ -87,6 +117,7 @@ function Song({ song, user }) {
     }
     setPlaylistName("");
   }
+
   useEffect(
     function () {
       async function fetchSongRecommendations(artist, songName) {
@@ -105,37 +136,62 @@ function Song({ song, user }) {
           );
 
           const data = response.data;
-          // console.log("data", data);
-          setVideoId(() => data.items[0].id.videoId);
-          setRegionCode(() => data.regionCode);
+          console.log("data", data);
+
+          dispatch({
+            type: "SET_VIDEO_SONG",
+            payload: {
+              videoId: data.videoId,
+              regionCode: data.regionCode,
+              title: data.title,
+              artist: data.artist,
+            },
+          });
         } catch (error) {
           console.error("Error fetching song recommendations:", error);
+          dispatch({
+            type: "SET_ERROR",
+            payload: { error: "Failed to fetch song recommendations" },
+          });
         }
       }
       fetchSongRecommendations(artist, songName);
     },
-    [artist, songName, user.token]
+    [artist, songName, user.token, state.videoId, state.regionCode]
   );
 
-  useEffect(
-    function () {
-      async function fetchSong() {
-        if (videoId !== "" && regionCode !== "") {
-          const songVideo = await fetchVideoSong(
-            videoId,
-            regionCode,
-            user.token
-          );
-          setVideoSong(songVideo);
-          setVideoId("");
-          setRegionCode("");
-        }
-      }
-      fetchSong();
-    },
+  // useEffect(
+  //   function () {
+  //     async function fetchSong() {
+  //       if (state.videoId && state.regionCode) {
+  //         try {
+  //           dispatch({ type: "LOADING_SONG", payload: true });
+  //           console.log("Fetching video song for:", state.videoId);
+  //           console.log("regionCode", state.regionCode);
+  //           const songVideo = await fetchVideoSong(
+  //             state.videoId,
+  //             state.regionCode,
+  //             user.token
+  //           );
+  //           console.log("songVideo", songVideo);
+  //           // setVideoSong(songVideo);
+  //           dispatch({ type: "SET_VIDEO_SONG", payload: songVideo });
+  //           dispatch({ type: "SET_LOADING", payload: false });
+  //         } catch (error) {
+  //           console.error("Error fetching video song:", error);
+  //           dispatch({
+  //             type: "SET_ERROR",
+  //             payload: { error: "Failed to fetch video song" },
+  //           });
+  //         }
+  //       }
+  //       // console.log("videoSong", videoSong);
+  //     }
+  //     fetchSong();
+  //   },
 
-    [videoId, regionCode, videoSong, user.token]
-  );
+  //   [state.videoId, state.regionCode, user.token]
+  // );
 
   return (
     <div className="homeContainer">
@@ -191,20 +247,23 @@ function Song({ song, user }) {
         {artist} - {songName}
       </span>
 
-      <div className={styles.song}>
-        {videoSong && (
+      <>
+        {!state.loading && state.videoId ? (
           <iframe
-            width="450"
+            width="400"
             height="300"
-            src={`https://www.youtube.com/embed/${videoSong.items[0].id}`}
+            src={`https://www.youtube.com/embed/${state.videoId}`}
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowFullScreen
-            title={videoSong.items[0].title}
+            title={state.title}
           ></iframe>
+        ) : (
+          <div className={styles.noVideo}>No Video Available</div>
         )}
-      </div>
+        {state.loading && <div className={styles.loading}>Loading...</div>}
+        {state.error && <div className={styles.error}>{state.error}</div>}
+      </>
     </div>
   );
 }
-
 export default Song;

@@ -7,7 +7,9 @@ const { authenticate } = require("../middlewares/auth_middleware");
 const upload = multer(); // For parsing multipart/form-data
 
 // Existing route
-router.get("/", authenticate, songController.getById);
+router.get("/", authenticate, songController.getVideo);
+
+router.get("/song", authenticate, songController.getById);
 
 // New route for recognition
 router.post(

@@ -14,7 +14,7 @@ const fetchVideoSong = async (videoId, regionCode, token) => {
       }
     );
     const data = response.data;
-
+    // console.log("Fetched video song data:", data);
     return data;
   } catch (error) {
     console.error("Error fetching video song:", error);

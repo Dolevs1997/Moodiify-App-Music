@@ -100,6 +100,28 @@ const createPlaylist = async (req, res) => {
   }
 };
 
+const getPlaylistSongs = async (req, res) => {
+  console.log("Getting playlist songs");
+  console.log("Request query:", req.query);
+  console.log("Request query ID:", req.query.id);
+
+  const playlistId = req.query.id;
+  console.log("Playlist ID:", playlistId);
+  try {
+    const playlist = await PlaylistSchema.findById(playlistId).populate(
+      "songs"
+    );
+    if (!playlist) {
+      return res.status(404).json({ message: "Playlist not found" });
+    }
+    res.status(200).json(playlist.songs);
+  } catch (error) {
+    console.error("Error getting playlist songs:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 module.exports = {
   createPlaylist,
+  getPlaylistSongs,
 };

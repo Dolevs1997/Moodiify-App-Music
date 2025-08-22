@@ -6,7 +6,25 @@ const defaultOptions = require("../config/acr_config"); // your ACRCloud keys
 const { fetchPlaylistSongs } = require("../services/YouTube_service"); // assuming you move acr helper to utils
 const SongSchema = require("../schemas/Song_schema"); // Import the Song schema
 const PlaylistSchema = require("../schemas/Playlist_schema"); // Import the Playlist schema
+
 const getById = async (req, res) => {
+  const { id } = req.query;
+  if (!id) {
+    return res.status(400).json({ error: "Please provide id in query params" });
+  }
+  try {
+    const song = await SongSchema.findOne({ videoId: id });
+    if (!song) {
+      return res.status(404).json({ error: "Song not found" });
+    }
+    res.status(200).json(song);
+  } catch (err) {
+    console.error("Error fetching song by ID:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+const getVideo = async (req, res) => {
   const controller = new AbortController();
   const signal = controller.signal;
   const { videoId, regionCode } = req.query;
@@ -35,14 +53,16 @@ const recognizeAudio = async (req, res) => {
     return res.status(400).json({ error: "Audio file missing" });
   }
 
-  identify(audioBuffer, defaultOptions.default, (err, httpResponse, body) => {
+  identify(audioBuffer, defaultOptions.default, (err, body) => {
     if (err) {
       console.error("ACRCloud error:", err);
       return res.status(500).json({ error: "Audio recognition failed" });
     }
 
     try {
-      const result = JSON.parse(body);
+      console.log("ACRCloud response body:", body);
+      const result = body;
+      console.log("ACRCloud response:", result);
       return res.status(200).json(result);
     } catch (e) {
       console.error("Failed to parse ACRCloud response:", e);
@@ -77,4 +97,4 @@ const deletebyId = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
-module.exports = { getById, recognizeAudio, getAll, deletebyId };
+module.exports = { getVideo, recognizeAudio, getAll, deletebyId, getById };

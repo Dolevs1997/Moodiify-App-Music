@@ -1,8 +1,19 @@
-import { addDoc, collection } from "firebase/firestore";
+import { addDoc, collection, query, where, getDocs } from "firebase/firestore";
 import { db } from "../../config/firebase_config.js";
 
 const addSongVideo = async (songVideo) => {
   try {
+    // Check if the song video already exists
+    const songVideoQuery = query(
+      collection(db, "song-video"),
+      where("title", "==", songVideo.title),
+      where("videoId", "==", songVideo.videoId)
+    );
+    const querySnapshot = await getDocs(songVideoQuery);
+    if (!querySnapshot.empty) {
+      console.log("Song video already exists:", querySnapshot.docs[0].id);
+      return; // Song video already exists, no need to add
+    }
     const docRef = await addDoc(collection(db, "song-video"), {
       title: songVideo.title,
       videoId: songVideo.videoId,
