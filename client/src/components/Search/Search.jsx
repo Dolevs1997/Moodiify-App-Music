@@ -10,12 +10,11 @@ export default function Search({
   const [isRecording, setIsRecording] = useState(false);
   return (
     <div className={styles.searchBar}>
-      <input className={styles.search} type="text" placeholder={`Search`} />
-      <span className={styles.materialIconsOutlined}>
+      {/* <input className={styles.search} type="text" placeholder={`Search`} /> */}
+      {/* <span className={styles.materialIconsOutlined}>
         <img src="/moodiify/search_i.png" />
-      </span>
+      </span> */}
       <span
-        className={styles.materialSymbolsOutlined}
         onClick={() => {
           setIsRecording(!isRecording);
           if (isRecording) {

@@ -9,13 +9,13 @@
   color: var(--color-text);
   background-color: var(--color-text);
 }
-.search::placeholder {
+/* .search::placeholder {
   color: var(--color-text-dark);
-}
-.search:focus {
+} */
+/* .search:focus {
   width: 35rem;
   outline: none;
-}
+} */
 .searchBar {
   display: flex;
   align-items: center;
@@ -23,8 +23,8 @@
 }
 
 .searchBar img {
-  width: 30px;
-  height: 30px;
+  width: 60px;
+  height: 60px;
 }
 .searchBar img:hover {
   cursor: pointer;
