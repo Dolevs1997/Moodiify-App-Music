@@ -7,6 +7,7 @@ import Register from "./pages/Register/Register";
 import SongsPlaylist from "./pages/SongsPlaylist/SongsPlaylist";
 import ErrorPage from "./pages/ErrorPage/ErrorPage";
 import SongsPlaylistUser from "./pages/SongsPlaylistUser/SongsPlaylistUser";
+import Categories from "./components/Categories/Categories";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 function App() {
@@ -34,6 +35,9 @@ function App() {
           path="/myplaylists/:playlistId"
           element={<SongsPlaylistUser />}
         />
+        <Route path="/global" element={<Home />}>
+          <Route path="categories" element={<Categories />} />
+        </Route>
 
         <Route path="/home" element={<Home />}>
           <Route path="categories" element={<Navigate to="/home" />} />

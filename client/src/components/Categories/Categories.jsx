@@ -12,9 +12,10 @@ const SERVER_URL = import.meta.env.VITE_SERVER_URL;
 function Categories({ user }) {
   const [categories, setCategories] = useState([]);
   const [showMore, setShowMore] = useState(false);
-  const [showLess, setShowLess] = useState(true);
+
   let limit = categories.length === 0 ? 6 : categories.length;
   const navigate = useNavigate();
+  console.log("categories");
   if (!user.token) {
     navigate("/login");
   }
@@ -60,9 +61,7 @@ function Categories({ user }) {
     try {
       if (show == "show more") {
         setShowMore(true);
-        setShowLess(false);
       } else if (show == "show less") {
-        setShowLess(true);
         setShowMore(false);
       }
 
@@ -82,10 +81,10 @@ function Categories({ user }) {
         console.error("Error fetching categories:", response.statusText);
       } else {
         setCategories(response.data.categories.items);
-        if (showMore === true && showLess === false) {
+        if (showMore === true) {
           navigate("/home");
         }
-        if (showLess === true && showMore === false) {
+        if (showMore === false) {
           navigate("/home/categories");
         }
       }
@@ -121,21 +120,19 @@ function Categories({ user }) {
             />
           ))}
       </div>
-      {!showMore && (
+      {!showMore ? (
         <Link
           className="link"
           onClick={() => handleShowCategories("show more")}
         >
           Show More
         </Link>
-      )}
-
-      {!showLess && (
+      ) : (
         <Link
           className="link"
           onClick={() => handleShowCategories("show less")}
         >
-          Show less
+          Show Less
         </Link>
       )}
     </>

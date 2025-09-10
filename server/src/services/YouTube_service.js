@@ -10,6 +10,7 @@ async function fetchPlaylists(playlistName) {
   try {
     const response = await fetch(url, { signal });
     const data = await response.json();
+    console.log("Playlists data:", data);
     return data.items.map((item) => ({
       id: item.id.playlistId,
       title: item.snippet.title,

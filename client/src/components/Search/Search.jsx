@@ -4,10 +4,13 @@ import { useState } from "react";
 export default function Search({
   handleFormVisible,
   handleVoiceSearch,
-  onStartRecording,
-  onStopRecording,
+  handleStartRecording,
+  handleStopRecording,
+  isMapVisible,
+  setIsMapVisible,
 }) {
   const [isRecording, setIsRecording] = useState(false);
+
   return (
     <div className={styles.searchBar}>
       {/* <input className={styles.search} type="text" placeholder={`Search`} /> */}
@@ -18,26 +21,23 @@ export default function Search({
         onClick={() => {
           setIsRecording(!isRecording);
           if (isRecording) {
-            onStopRecording();
+            handleStopRecording();
           } else {
-            onStartRecording();
+            handleStartRecording();
           }
         }}
       >
         <img src="/moodiify/record_i.png" />
       </span>
-      <span
-        className={styles.materialIconsOutlined}
-        onClick={handleVoiceSearch}
-      >
+      <span onClick={handleVoiceSearch}>
         <img src="/moodiify/mic_i.png" />
       </span>
 
-      <span
-        className={styles.materialSymbolsOutlined}
-        onClick={handleFormVisible}
-      >
+      <span onClick={handleFormVisible}>
         <img src="/moodiify/chat_i.png" />
+      </span>
+      <span onClick={() => setIsMapVisible(!isMapVisible)}>
+        <img src="/moodiify/earth_i.png" />
       </span>
     </div>
   );

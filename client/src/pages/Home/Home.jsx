@@ -8,6 +8,7 @@ import axios from "axios";
 import NavBar from "../../components/NavBar/NavBar";
 import { useNavigate } from "react-router-dom";
 import startRecognition from "../../utils/recognization_song";
+import MapComponent from "../../components/Map/MapComponent";
 
 let mediaRecorder;
 let audioChunks = [];
@@ -19,6 +20,7 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isRecording, setIsRecording] = useState(false);
+  const [isMapVisible, setIsMapVisible] = useState(false);
   useEffect(() => {
     document.title = "Moodiify | Home";
   }, []);
@@ -75,7 +77,7 @@ export default function Home() {
     };
   }
 
-  async function startRecording() {
+  async function handleStartRecording() {
     console.log("Recording started");
     setIsRecording(true);
     event.preventDefault();
@@ -87,7 +89,7 @@ export default function Home() {
 
     mediaRecorder.start();
   }
-  function stopRecording() {
+  function handleStopRecording() {
     mediaRecorder.stop();
 
     mediaRecorder.onstop = async () => {
@@ -132,6 +134,12 @@ export default function Home() {
     };
   }
 
+  useEffect(() => {
+    if (isMapVisible) {
+      navigate("/global");
+    }
+  }, [isMapVisible, navigate]);
+
   const handleFormVisible = () => setFormVisible(!formVisible);
 
   return (
@@ -142,8 +150,10 @@ export default function Home() {
           <Search
             handleFormVisible={handleFormVisible}
             handleVoiceSearch={handleVoiceSearch}
-            onStartRecording={startRecording}
-            onStopRecording={stopRecording}
+            handleStartRecording={handleStartRecording}
+            handleStopRecording={handleStopRecording}
+            isMapVisible={isMapVisible}
+            setIsMapVisible={setIsMapVisible}
           />
         )}
         <NavBar user={userData} />
@@ -151,18 +161,23 @@ export default function Home() {
       <div className="homeContainer">
         {!isLoading && !error && (
           <>
-            {formVisible && (
+            {formVisible && !isMapVisible && (
               <Form
                 setSongSuggestions={setSongSuggestions}
                 handleFormVisible={handleFormVisible}
               />
             )}
-            {songSuggestions.length == 0 && <Categories user={userData} />}
-            {songSuggestions.length > 0 && isRecording === false && (
-              <Songs songSuggestions={songSuggestions} user={userData} />
+            {songSuggestions.length == 0 && !isMapVisible && (
+              <Categories user={userData} />
             )}
+            {songSuggestions.length > 0 &&
+              !isMapVisible &&
+              isRecording === false && (
+                <Songs songSuggestions={songSuggestions} user={userData} />
+              )}
           </>
         )}
+        {isMapVisible && <MapComponent />}
       </div>
     </main>
   );
