@@ -3,15 +3,16 @@ import styles from "./Category.module.css";
 import { useState } from "react";
 import { useNavigate } from "react-router";
 import toast, { Toaster } from "react-hot-toast";
-function Category({ category, token }) {
+function Category({ category, token, country, location }) {
   const navigate = useNavigate();
   const [, setPlaylistsCategory] = useState([]);
-
+  console.log("category component country:", country);
+  console.log("category component location:", location);
   async function handleClickCategory(name) {
     const response = await fetch(
       `http://${
         import.meta.env.VITE_SERVER_URL
-      }/moodiify/categories/category/?name=${name}`,
+      }/moodiify/categories/category/?name=${name}&country=${country}&location=${location}`,
       {
         method: "GET",
         headers: {
@@ -30,6 +31,8 @@ function Category({ category, token }) {
           playlistsCategory: data,
           categoryName: name,
           token: token,
+          country: country,
+          location: location,
         },
       });
     } else {

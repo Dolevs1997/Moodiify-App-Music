@@ -56,7 +56,12 @@ function SongsPlaylist() {
             {playlist
               .filter((song) => song.title.includes("-"))
               .map((song, index) => (
-                <Song song={song.title} user={user} key={index} />
+                <Song
+                  song={song.title}
+                  user={user}
+                  key={index}
+                  country={location.state.country}
+                />
               ))}
           </ul>
         ) : (

@@ -2,15 +2,20 @@ const dotenv = require("dotenv");
 dotenv.config();
 const API_KEY = process.env.YOUTUBE_API_KEY;
 
-async function fetchPlaylists(playlistName) {
+async function fetchPlaylists(
+  playlistName,
+  country = "US",
+  location = "United States"
+) {
+  console.log("Fetching playlists for:", playlistName, "in country:", country);
   const controller = new AbortController();
   const signal = controller.signal;
-  const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=23&q=${playlistName} music playlists&regionCode=IL&type=playlist&key=${API_KEY}`;
+  const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=23&q=${playlistName} ${location} music playlists&regionCode=${country}&type=playlist&key=${API_KEY}`;
   console.log("Fetching playlists from URL:", url);
   try {
     const response = await fetch(url, { signal });
     const data = await response.json();
-    console.log("Playlists data:", data);
+    // console.log("Playlists data:", data);
     return data.items.map((item) => ({
       id: item.id.playlistId,
       title: item.snippet.title,

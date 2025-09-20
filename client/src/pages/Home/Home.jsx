@@ -21,6 +21,7 @@ export default function Home() {
   const [error, setError] = useState(null);
   const [isRecording, setIsRecording] = useState(false);
   const [isMapVisible, setIsMapVisible] = useState(false);
+  // console.log("location at home:", location);
   useEffect(() => {
     document.title = "Moodiify | Home";
   }, []);
@@ -170,14 +171,16 @@ export default function Home() {
             {songSuggestions.length == 0 && !isMapVisible && (
               <Categories user={userData} />
             )}
+
             {songSuggestions.length > 0 &&
               !isMapVisible &&
               isRecording === false && (
                 <Songs songSuggestions={songSuggestions} user={userData} />
               )}
+
+            {isMapVisible && <MapComponent />}
           </>
         )}
-        {isMapVisible && <MapComponent />}
       </div>
     </main>
   );

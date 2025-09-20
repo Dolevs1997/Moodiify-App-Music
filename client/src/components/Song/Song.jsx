@@ -41,7 +41,7 @@ function reducer(state, action) {
   }
 }
 
-function Song({ song, user }) {
+function Song({ song, user, country }) {
   const navigate = useNavigate();
   const songName = song.split(" - ")[1];
   const artist = song.split(" - ")[0];
@@ -126,7 +126,7 @@ function Song({ song, user }) {
           const response = await axios.get(
             `http://${
               import.meta.env.VITE_SERVER_URL
-            }/moodiify/recommends/?artist=${artist}&songName=${songName}`,
+            }/moodiify/recommends/?artist=${artist}&songName=${songName}&country=${country}`,
             {
               headers: {
                 "Content-Type": "application/json",
@@ -157,7 +157,7 @@ function Song({ song, user }) {
       }
       fetchSongRecommendations(artist, songName);
     },
-    [artist, songName, user.token, state.videoId, state.regionCode]
+    [artist, songName, user.token, state.videoId, state.regionCode, country]
   );
 
   // useEffect(

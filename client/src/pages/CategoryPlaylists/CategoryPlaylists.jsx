@@ -43,6 +43,7 @@ function CategoryPlaylists() {
                 playlist={playlist}
                 key={playlist.id}
                 token={location.state.token}
+                shortName={location.state.country}
               />
             ))}
         </div>

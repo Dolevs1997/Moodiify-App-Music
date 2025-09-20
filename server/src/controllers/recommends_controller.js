@@ -5,9 +5,10 @@ dotenv.config();
 const API_KEY = process.env.YOUTUBE_API_KEY;
 
 const getAll = async (req, res) => {
-  const { artist, songName } = req.query;
+  const { artist, songName, country } = req.query;
+  console.log("Received query params:", req.query);
   const controller = new AbortController();
-  const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(
+  const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&regionCode=${country}&q=${encodeURIComponent(
     `${artist} ${songName}`
   )}&type=video&key=${API_KEY}
 `;

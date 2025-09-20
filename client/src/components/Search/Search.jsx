@@ -13,10 +13,6 @@ export default function Search({
 
   return (
     <div className={styles.searchBar}>
-      {/* <input className={styles.search} type="text" placeholder={`Search`} /> */}
-      {/* <span className={styles.materialIconsOutlined}>
-        <img src="/moodiify/search_i.png" />
-      </span> */}
       <span
         onClick={() => {
           setIsRecording(!isRecording);
