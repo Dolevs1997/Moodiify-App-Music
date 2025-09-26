@@ -3,7 +3,7 @@ const { fetchPlaylists } = require("../services/YouTube_service");
 const getAll = async (req, res) => {
   const token = req.token;
   const query = req.query;
-  console.log("Query Params: ", query);
+  // console.log("Query Params: ", query);
   const result = await fetch(
     `https://api.spotify.com/v1/browse/categories?limit=${req.query.limit}&locale=${req.query.locale}`,
     {

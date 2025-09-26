@@ -1,11 +1,12 @@
 const dotenv = require("dotenv");
 dotenv.config();
 const API_KEY = process.env.YOUTUBE_API_KEY;
-const { identify } = require("../services/MusicRecognition_service"); // assuming you move acr helper to utils
+const identify = require("../services/MusicRecognition_service");
 const defaultOptions = require("../config/acr_config"); // your ACRCloud keys
-const { fetchPlaylistSongs } = require("../services/YouTube_service"); // assuming you move acr helper to utils
+const { fetchPlaylistSongs } = require("../services/YouTube_service");
 const SongSchema = require("../schemas/Song_schema"); // Import the Song schema
 const PlaylistSchema = require("../schemas/Playlist_schema"); // Import the Playlist schema
+const fs = require("fs");
 
 const getById = async (req, res) => {
   const { id } = req.query;
@@ -42,34 +43,31 @@ const getVideo = async (req, res) => {
 };
 
 const recognizeAudio = async (req, res) => {
-  console.log("Recognizing audio...");
-  console.log("Request file:", req.file);
   if (!req.file) {
     return res.status(400).json({ error: "Audio file missing" });
   }
-  const audioBuffer = req.file?.buffer;
-  console.log("Audio buffer:", audioBuffer);
-  if (!audioBuffer) {
+
+  console.log("options:", defaultOptions);
+  let data = fs.readFileSync(req.file.path);
+  if (!data) {
     return res.status(400).json({ error: "Audio file missing" });
   }
-
-  identify(audioBuffer, defaultOptions.default, (err, body) => {
-    if (err) {
-      console.error("ACRCloud error:", err);
-      return res.status(500).json({ error: "Audio recognition failed" });
+  identify(data, defaultOptions.default, async function (err, body) {
+    if (err) console.log(err);
+    console.log("ACRCloud response body:", body);
+    if (!body || !body.metadata || !body.metadata.music) {
+      return res.status(400).json({ error: "Unable to recognize audio" });
     }
-
-    try {
-      console.log("ACRCloud response body:", body);
-      const result = body;
-      console.log("ACRCloud response:", result);
-      return res.status(200).json(result);
-    } catch (e) {
-      console.error("Failed to parse ACRCloud response:", e);
-      return res
-        .status(500)
-        .json({ error: "Unexpected response from ACRCloud" });
-    }
+    // Process the recognized music data
+    const musicInfo = body.metadata.music[0];
+    console.log("Recognized music info:", musicInfo);
+    // Clean up the uploaded file
+    fs.unlink(req.file.path, (err) => {
+      if (err) {
+        console.error("Error deleting temporary audio file:", err);
+      }
+    });
+    res.status(200).json(musicInfo);
   });
 };
 

@@ -41,8 +41,9 @@ function reducer(state, action) {
   }
 }
 
-function Song({ song, user, country }) {
+function Song({ song, user, country = "US" }) {
   const navigate = useNavigate();
+  console.log("song in Song component:", song);
   const songName = song.split(" - ")[1];
   const artist = song.split(" - ")[0];
   const [playlistName, setPlaylistName] = useState("");
@@ -122,6 +123,12 @@ function Song({ song, user, country }) {
     function () {
       async function fetchSongRecommendations(artist, songName) {
         if (!artist || !songName || !user.token) return;
+        console.log(
+          "Fetching song recommendations for:",
+          artist,
+          songName,
+          country
+        );
         try {
           const response = await axios.get(
             `http://${

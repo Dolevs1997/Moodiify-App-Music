@@ -1,5 +1,4 @@
 var crypto = require("crypto");
-//npm install request
 const axios = require("axios");
 const FormData = require("form-data");
 
@@ -27,10 +26,11 @@ function sign(signString, accessSecret) {
 /**
  * Identifies a sample of bytes
  */
-async function identify(data, options, cb) {
+function identify(data, options, cb) {
   var current_data = new Date();
   var timestamp = current_data.getTime() / 1000;
-
+  console.log("options:", options);
+  console.log("data received:", data);
   var stringToSign = buildStringToSign(
     "POST",
     options.endpoint,
@@ -39,36 +39,42 @@ async function identify(data, options, cb) {
     options.signature_version,
     timestamp
   );
+  console.log("String to sign:", stringToSign);
 
   var signature = sign(stringToSign, options.access_secret);
-  try {
-    var form = new FormData();
-    form.append("sample", data);
-    form.append("sample_bytes", data.length);
-    form.append("access_key", options.access_key);
-    form.append("data_type", options.data_type);
-    form.append("signature_version", options.signature_version);
-    form.append("signature", signature);
-    form.append("timestamp", timestamp);
-    // console.log("Form data:", form);
-    const result = await axios.post(
-      "http://" + options.host + options.endpoint,
-      form,
-      {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      }
-    );
-    console.log("Result:", result.data);
-    return cb(null, result.data);
-  } catch (err) {
-    console.error("Error:", err);
+  console.log("Signature:", signature);
+  // const blobData = new Blob([data], { type: "application/octet-stream" });
+  // console.log("Blob data created:", blobData);
+  var form = new FormData();
+  form.append("sample", data, {
+    filename: "sample.wav",
+    contentType: "audio/wav",
+  });
+  form.append("sample_bytes", data.length);
+  form.append("access_key", options.access_key);
+  form.append("data_type", options.data_type);
+  form.append("signature_version", options.signature_version);
+  form.append("signature", signature);
+  form.append("timestamp", timestamp);
+  console.log("Form data prepared:", form);
+  axios
+    .post("http://" + options.host + options.endpoint, form, {
+      headers: form.getHeaders(),
+    })
+    .then((response) => {
+      console.log("ACRCloud response:", response.data);
+      cb(null, response.data);
+    })
+    .catch((error) => {
+      console.error("Error during ACRCloud request:", error);
+      cb(error, null);
+    });
 
-    return cb(err, null);
-  }
+  //fetch("http://"+options.host + options.endpoint,
+  //      {method: 'POST', body: form })
+  //      .then((res) => {return res.text()})
+  //      .then((res) => {cb(res, null)})
+  //      .catch((err) => {cb(null, err)});
 }
 
-module.exports = {
-  identify,
-};
+module.exports = identify;

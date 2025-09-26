@@ -14,8 +14,7 @@ function Categories({ user }) {
   const params = useParams();
   const country = params.country || "US";
   const location = useLocation();
-  console.log("location state:", location.state);
-  console.log("country in categories:", country);
+
   const [currentLocation, setCurrentLocation] = useState(
     location.state?.locationName || "United States"
   );

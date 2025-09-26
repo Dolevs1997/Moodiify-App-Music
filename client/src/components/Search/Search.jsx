@@ -1,23 +1,27 @@
 /* eslint-disable react/prop-types */
 import styles from "./Search.module.css";
-import { useState } from "react";
+import {
+  handleStartRecording,
+  handleStopRecording,
+} from "../../utils/recording";
 export default function Search({
   handleFormVisible,
   handleVoiceSearch,
-  handleStartRecording,
-  handleStopRecording,
   isMapVisible,
   setIsMapVisible,
+  isRecording,
+  setIsRecording,
+  userData,
+  setSongSuggestions,
 }) {
-  const [isRecording, setIsRecording] = useState(false);
-
   return (
     <div className={styles.searchBar}>
       <span
         onClick={() => {
           setIsRecording(!isRecording);
+          console.log(isRecording);
           if (isRecording) {
-            handleStopRecording();
+            handleStopRecording(userData, setSongSuggestions);
           } else {
             handleStartRecording();
           }

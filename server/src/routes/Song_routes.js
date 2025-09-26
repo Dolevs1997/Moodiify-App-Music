@@ -4,7 +4,7 @@ const multer = require("multer");
 const songController = require("../controllers/song_controller");
 const { authenticate } = require("../middlewares/auth_middleware");
 
-const upload = multer(); // For parsing multipart/form-data
+const upload = multer({ dest: "uploads/" }); // For parsing multipart/form-data
 
 // Existing route
 router.get("/", authenticate, songController.getVideo);

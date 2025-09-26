@@ -1,3 +1,6 @@
+import dotenv from "dotenv";
+dotenv.config();
+
 let defaultOptions = {
   host: process.env.ACR_CLOUD_HOST,
   endpoint: "/v1/identify",

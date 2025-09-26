@@ -10,8 +10,6 @@ import { useNavigate } from "react-router-dom";
 import startRecognition from "../../utils/recognization_song";
 import MapComponent from "../../components/Map/MapComponent";
 
-let mediaRecorder;
-let audioChunks = [];
 export default function Home() {
   const [formVisible, setFormVisible] = useState(false);
   const [songSuggestions, setSongSuggestions] = useState([]);
@@ -21,6 +19,8 @@ export default function Home() {
   const [error, setError] = useState(null);
   const [isRecording, setIsRecording] = useState(false);
   const [isMapVisible, setIsMapVisible] = useState(false);
+  console.log("songSuggestions at home:", songSuggestions);
+
   // console.log("location at home:", location);
   useEffect(() => {
     document.title = "Moodiify | Home";
@@ -78,63 +78,6 @@ export default function Home() {
     };
   }
 
-  async function handleStartRecording() {
-    console.log("Recording started");
-    setIsRecording(true);
-    event.preventDefault();
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    mediaRecorder = new MediaRecorder(stream);
-    mediaRecorder.ondataavailable = (event) => {
-      audioChunks.push(event.data);
-    };
-
-    mediaRecorder.start();
-  }
-  function handleStopRecording() {
-    mediaRecorder.stop();
-
-    mediaRecorder.onstop = async () => {
-      setIsRecording(false);
-      const audioBlob = new Blob(audioChunks, { type: "audio/wav" });
-      const formData = new FormData();
-      formData.append("file", audioBlob, "sample.wav");
-      console.log("Recording stopped");
-      const res = await fetch(
-        `http://${
-          import.meta.env.VITE_SERVER_URL
-        }/moodiify/videoSong/recognize-audio`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${userData.token}`,
-          },
-          body: formData,
-        }
-      );
-
-      const data = await res.json();
-      console.log(data.metadata);
-      if (data.error) {
-        console.error("Error:", data.error);
-        return;
-      }
-
-      setSongSuggestions([
-        data.metadata.music[0].artists[0].name +
-          " - " +
-          data.metadata.music[0].title,
-      ]);
-      console.log("Recognized text:", data.metadata.music[0].title);
-      console.log("Recognized text:", data.metadata.music[0].artists[0].name);
-      console.log(songSuggestions);
-      // setSongSuggestions([
-      //   data.metadata.music.artists[0].name + " - " + data.metadata.music.album,
-      // ]);
-
-      // show song info or video
-    };
-  }
-
   useEffect(() => {
     if (isMapVisible) {
       navigate("/global");
@@ -151,10 +94,12 @@ export default function Home() {
           <Search
             handleFormVisible={handleFormVisible}
             handleVoiceSearch={handleVoiceSearch}
-            handleStartRecording={handleStartRecording}
-            handleStopRecording={handleStopRecording}
             isMapVisible={isMapVisible}
             setIsMapVisible={setIsMapVisible}
+            isRecording={isRecording}
+            setIsRecording={setIsRecording}
+            userData={userData}
+            setSongSuggestions={setSongSuggestions}
           />
         )}
         <NavBar user={userData} />

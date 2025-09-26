@@ -17,7 +17,7 @@ const initApp = async () => {
   console.log("Initializing app");
   try {
     // Connect to MongoDB
-    console.log("Connecting to MongoDB...");
+    // console.log("Connecting to MongoDB...");
     mongoose.connect(process.env.DATABASE_URL);
     const db = mongoose.connection;
     db.on("error", (error) => console.error(error));

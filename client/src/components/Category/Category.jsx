@@ -6,8 +6,7 @@ import toast, { Toaster } from "react-hot-toast";
 function Category({ category, token, country, location }) {
   const navigate = useNavigate();
   const [, setPlaylistsCategory] = useState([]);
-  console.log("category component country:", country);
-  console.log("category component location:", location);
+
   async function handleClickCategory(name) {
     const response = await fetch(
       `http://${
