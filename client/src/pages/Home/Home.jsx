@@ -4,10 +4,8 @@ import Search from "../../components/Search/Search";
 import { useEffect, useState } from "react";
 import Form from "../../components/Form/Form";
 import Songs from "../../components/Songs/Songs";
-import axios from "axios";
 import NavBar from "../../components/NavBar/NavBar";
 import { useNavigate } from "react-router-dom";
-import startRecognition from "../../utils/recognization_song";
 import MapComponent from "../../components/Map/MapComponent";
 
 export default function Home() {
@@ -19,7 +17,6 @@ export default function Home() {
   const [error, setError] = useState(null);
   const [isRecording, setIsRecording] = useState(false);
   const [isMapVisible, setIsMapVisible] = useState(false);
-  console.log("songSuggestions at home:", songSuggestions);
 
   // console.log("location at home:", location);
   useEffect(() => {
@@ -42,41 +39,6 @@ export default function Home() {
       setUserData(JSON.parse(user));
     }
   }, [navigate]);
-  async function handleVoiceSearch() {
-    console.log("Voice search activated");
-    const recognition = startRecognition();
-
-    recognition.onresult = async (event) => {
-      const transcript = event.results[0][0].transcript;
-      console.log("Recognized text:", transcript);
-      const payload = {
-        text: transcript,
-        role: "user",
-      };
-      setFormVisible(false);
-      setSongSuggestions([]);
-
-      try {
-        const response = await axios.post(
-          `http://${import.meta.env.VITE_SERVER_URL}/api/openai`,
-          payload,
-          {
-            headers: {
-              "Content-Type": "application/json",
-
-              Authorization: `Bearer ${userData.token}`,
-            },
-          }
-        );
-        setSongSuggestions(response.data);
-        console.log("response: \n", response.data);
-      } catch (error) {
-        console.error("Error fetching song suggestions:", error);
-      } finally {
-        recognition.stop();
-      }
-    };
-  }
 
   useEffect(() => {
     if (isMapVisible) {
@@ -93,7 +55,7 @@ export default function Home() {
         {!isLoading && !error && (
           <Search
             handleFormVisible={handleFormVisible}
-            handleVoiceSearch={handleVoiceSearch}
+            setFormVisible={setFormVisible}
             isMapVisible={isMapVisible}
             setIsMapVisible={setIsMapVisible}
             isRecording={isRecording}

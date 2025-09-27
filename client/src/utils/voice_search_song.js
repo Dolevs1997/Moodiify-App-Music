@@ -1,4 +1,4 @@
-function startRecognition() {
+function voiceSearchSong() {
   const SpeechRecognition =
     window.SpeechRecognition || window.webkitSpeechRecognition;
   const SpeechGrammarList =
@@ -13,8 +13,7 @@ function startRecognition() {
   recognition.lang = "en-US";
   recognition.maxAlternatives = 1;
   recognition.start();
-
   return recognition;
 }
 
-export default startRecognition;
+export default voiceSearchSong;

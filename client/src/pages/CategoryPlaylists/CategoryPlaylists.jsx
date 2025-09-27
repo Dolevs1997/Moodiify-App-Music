@@ -14,10 +14,10 @@ function CategoryPlaylists() {
   const user = localStorage.getItem("user")
     ? JSON.parse(localStorage.getItem("user"))
     : null;
+
   useEffect(() => {
     document.title = "Moodiify | Category Playlists";
   }, []);
-
   useEffect(() => {
     const { state } = location;
     if (state && state.playlistsCategory && state.categoryName && state.token) {
@@ -30,7 +30,7 @@ function CategoryPlaylists() {
     <>
       <div className={styles.header}>
         <Logo />
-        <Search />
+        <Search userData={user} />
         <NavBar user={user} />
       </div>
       <div className={styles.playlistsContainer}>

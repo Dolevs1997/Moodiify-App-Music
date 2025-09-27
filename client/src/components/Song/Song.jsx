@@ -63,10 +63,6 @@ function Song({ song, user, country = "US" }) {
     user.playlists = [];
   }
   async function handleAddSongToPlaylist(playlistName) {
-    // console.log("songName", songName);
-    // console.log("artist", artist);
-
-    // console.log("playlistName", playlistName);
     try {
       const response = await axios.post(
         `http://${import.meta.env.VITE_SERVER_URL}/moodiify/playlist/create`,
@@ -166,39 +162,6 @@ function Song({ song, user, country = "US" }) {
     },
     [artist, songName, user.token, state.videoId, state.regionCode, country]
   );
-
-  // useEffect(
-  //   function () {
-  //     async function fetchSong() {
-  //       if (state.videoId && state.regionCode) {
-  //         try {
-  //           dispatch({ type: "LOADING_SONG", payload: true });
-  //           console.log("Fetching video song for:", state.videoId);
-  //           console.log("regionCode", state.regionCode);
-  //           const songVideo = await fetchVideoSong(
-  //             state.videoId,
-  //             state.regionCode,
-  //             user.token
-  //           );
-  //           console.log("songVideo", songVideo);
-  //           // setVideoSong(songVideo);
-  //           dispatch({ type: "SET_VIDEO_SONG", payload: songVideo });
-  //           dispatch({ type: "SET_LOADING", payload: false });
-  //         } catch (error) {
-  //           console.error("Error fetching video song:", error);
-  //           dispatch({
-  //             type: "SET_ERROR",
-  //             payload: { error: "Failed to fetch video song" },
-  //           });
-  //         }
-  //       }
-  //       // console.log("videoSong", videoSong);
-  //     }
-  //     fetchSong();
-  //   },
-
-  //   [state.videoId, state.regionCode, user.token]
-  // );
 
   return (
     <div className="homeContainer">
