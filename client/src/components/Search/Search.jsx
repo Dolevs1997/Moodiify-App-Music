@@ -4,61 +4,28 @@ import {
   handleStartRecording,
   handleStopRecording,
 } from "../../utils/recording";
-import voiceSearchSong from "../../utils/voice_search_song";
-import axios from "axios";
+import { handleVoiceSearch } from "../../utils/voice_search_song";
+import { useNavigate } from "react-router";
 export default function Search({
-  handleFormVisible,
+  setFormVisible,
+  formVisible,
   isMapVisible,
   setIsMapVisible,
   isRecording,
   setIsRecording,
   userData,
   setSongSuggestions,
-  setFormVisible,
+  setIsVoiceSearch,
 }) {
-  async function handleVoiceSearch() {
-    console.log("Voice search activated");
-    const recognition = voiceSearchSong();
-
-    recognition.onresult = async (event) => {
-      const transcript = event.results[0][0].transcript;
-      console.log("Recognized text:", transcript);
-      const payload = {
-        text: transcript,
-        role: "user",
-      };
-      setFormVisible(false);
-      setSongSuggestions([]);
-
-      try {
-        const response = await axios.post(
-          `http://${import.meta.env.VITE_SERVER_URL}/api/openai`,
-          payload,
-          {
-            headers: {
-              "Content-Type": "application/json",
-
-              Authorization: `Bearer ${userData.token}`,
-            },
-          }
-        );
-        setSongSuggestions(response.data);
-        console.log("response: \n", response.data);
-      } catch (error) {
-        console.error("Error fetching song suggestions:", error);
-      } finally {
-        recognition.stop();
-      }
-    };
-  }
+  const navigate = useNavigate();
   return (
     <div className={styles.searchBar}>
       <span
         onClick={() => {
           setIsRecording(!isRecording);
-          console.log(isRecording);
           if (isRecording) {
             handleStopRecording(userData, setSongSuggestions);
+            navigate("/home");
           } else {
             handleStartRecording();
           }
@@ -66,14 +33,34 @@ export default function Search({
       >
         <img src="/moodiify/record_i.png" />
       </span>
-      <span onClick={handleVoiceSearch}>
+      <span
+        onClick={async () => {
+          setIsVoiceSearch(true);
+          const response = await handleVoiceSearch(userData);
+          if (!response) return;
+          console.log("response from voice search:", response);
+          setSongSuggestions(response);
+          setIsVoiceSearch(false);
+          navigate("/home");
+        }}
+      >
         <img src="/moodiify/mic_i.png" />
       </span>
 
-      <span onClick={handleFormVisible}>
+      <span
+        onClick={() => {
+          setFormVisible(!formVisible);
+          navigate("/home");
+        }}
+      >
         <img src="/moodiify/chat_i.png" />
       </span>
-      <span onClick={() => setIsMapVisible(!isMapVisible)}>
+      <span
+        onClick={() => {
+          setIsMapVisible(!isMapVisible);
+          navigate("/global");
+        }}
+      >
         <img src="/moodiify/earth_i.png" />
       </span>
     </div>

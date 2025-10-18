@@ -1,24 +1,35 @@
 import Categories from "../../components/Categories/Categories";
 import Logo from "../../components/Logo/Logo";
 import Search from "../../components/Search/Search";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import Form from "../../components/Form/Form";
 import Songs from "../../components/Songs/Songs";
 import NavBar from "../../components/NavBar/NavBar";
 import { useNavigate } from "react-router-dom";
 import MapComponent from "../../components/Map/MapComponent";
 
+import { SearchContext } from "../../Contexts/SearchContext";
 export default function Home() {
-  const [formVisible, setFormVisible] = useState(false);
-  const [songSuggestions, setSongSuggestions] = useState([]);
+  const {
+    songSuggestions,
+    setSongSuggestions,
+    isRecording,
+    setIsRecording,
+    isMapVisible,
+    setIsMapVisible,
+    formVisible,
+    setFormVisible,
+    isVoiceSearch,
+    setIsVoiceSearch,
+  } = useContext(SearchContext);
+
   const navigate = useNavigate();
   const [userData, setUserData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [isRecording, setIsRecording] = useState(false);
-  const [isMapVisible, setIsMapVisible] = useState(false);
-
+  // console.log("songSuggestions at home:", songSuggestions);
   // console.log("location at home:", location);
+  console.log("formVisible:", formVisible);
   useEffect(() => {
     document.title = "Moodiify | Home";
   }, []);
@@ -46,22 +57,21 @@ export default function Home() {
     }
   }, [isMapVisible, navigate]);
 
-  const handleFormVisible = () => setFormVisible(!formVisible);
-
   return (
     <main className="home">
       <section className="header">
         <Logo />
         {!isLoading && !error && (
           <Search
-            handleFormVisible={handleFormVisible}
             setFormVisible={setFormVisible}
+            formVisible={formVisible}
             isMapVisible={isMapVisible}
             setIsMapVisible={setIsMapVisible}
             isRecording={isRecording}
             setIsRecording={setIsRecording}
             userData={userData}
             setSongSuggestions={setSongSuggestions}
+            setIsVoiceSearch={setIsVoiceSearch}
           />
         )}
         <NavBar user={userData} />
@@ -72,16 +82,24 @@ export default function Home() {
             {formVisible && !isMapVisible && (
               <Form
                 setSongSuggestions={setSongSuggestions}
-                handleFormVisible={handleFormVisible}
+                setFormVisible={setFormVisible}
+                formVisible={formVisible}
               />
             )}
             {songSuggestions.length == 0 && !isMapVisible && (
               <Categories user={userData} />
             )}
+            {songSuggestions.length > 0 &&
+              !isVoiceSearch &&
+              !isMapVisible &&
+              !isRecording && (
+                <Songs songSuggestions={songSuggestions} user={userData} />
+              )}
 
             {songSuggestions.length > 0 &&
               !isMapVisible &&
-              isRecording === false && (
+              !isRecording &&
+              isVoiceSearch && (
                 <Songs songSuggestions={songSuggestions} user={userData} />
               )}
 

@@ -1,20 +1,23 @@
 // import styles from "./SongsPlaylist.module.css";
 import { useParams, useLocation } from "react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import Song from "../../components/Song/Song";
 import Logo from "../../components/Logo/Logo";
 import Search from "../../components/Search/Search";
 import NavBar from "../../components/NavBar/NavBar";
+import { SearchContext } from "../../Contexts/SearchContext";
 // import { useNavigate } from "react-router-dom";
 function SongsPlaylist() {
   const { playlistId } = useParams();
   const location = useLocation();
   const { playlistName } = location.state || {};
   const [playlist, setPlaylist] = useState([]);
+  const searchContext = useContext(SearchContext);
   const user = localStorage.getItem("user")
     ? JSON.parse(localStorage.getItem("user"))
     : null;
   // console.log("playlist", playlist);
+  console.log("SearchContext in SongsPlaylist:", searchContext);
   useEffect(() => {
     const fetchPlaylist = async () => {
       try {
@@ -46,7 +49,18 @@ function SongsPlaylist() {
     <main className="homeContainer">
       <div className="header">
         <Logo />
-        <Search />
+        <Search
+          setFormVisible={searchContext.setFormVisible}
+          formVisible={searchContext.formVisible}
+          isMapVisible={searchContext.isMapVisible}
+          setIsMapVisible={searchContext.setIsMapVisible}
+          isRecording={searchContext.isRecording}
+          setIsRecording={searchContext.setIsRecording}
+          userData={user}
+          setSongSuggestions={searchContext.setSongSuggestions}
+          setIsVoiceSearch={searchContext.setIsVoiceSearch}
+          isVoiceSearch={searchContext.isVoiceSearch}
+        />
         <NavBar user={user} />
       </div>
       <h2>{playlistName}</h2>

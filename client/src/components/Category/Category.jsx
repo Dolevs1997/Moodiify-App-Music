@@ -3,9 +3,11 @@ import styles from "./Category.module.css";
 import { useState } from "react";
 import { useNavigate } from "react-router";
 import toast, { Toaster } from "react-hot-toast";
+
 function Category({ category, token, country, location }) {
   const navigate = useNavigate();
   const [, setPlaylistsCategory] = useState([]);
+
   async function handleClickCategory(name) {
     const response = await fetch(
       `http://${

@@ -2,10 +2,12 @@ import styles from "./CategoryPlaylists.module.css";
 import { useLocation } from "react-router-dom";
 import PlaylistCategory from "../../components/PlaylistCategory/PlaylistCategory";
 import { useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import Logo from "../../components/Logo/Logo";
 import Search from "../../components/Search/Search";
 import NavBar from "../../components/NavBar/NavBar";
+
+import { SearchContext } from "../../Contexts/SearchContext";
 function CategoryPlaylists() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -14,6 +16,8 @@ function CategoryPlaylists() {
   const user = localStorage.getItem("user")
     ? JSON.parse(localStorage.getItem("user"))
     : null;
+  const searchContext = useContext(SearchContext);
+  // console.log("searchContext in CategoryPlaylists:", searchContext);
 
   useEffect(() => {
     document.title = "Moodiify | Category Playlists";
@@ -30,7 +34,17 @@ function CategoryPlaylists() {
     <>
       <div className={styles.header}>
         <Logo />
-        <Search userData={user} />
+        <Search
+          setFormVisible={searchContext.setFormVisible}
+          formVisible={searchContext.formVisible}
+          isMapVisible={searchContext.isMapVisible}
+          setIsMapVisible={searchContext.setIsMapVisible}
+          isRecording={searchContext.isRecording}
+          setIsRecording={searchContext.setIsRecording}
+          userData={user}
+          setSongSuggestions={searchContext.setSongSuggestions}
+          setIsVoiceSearch={searchContext.setIsVoiceSearch}
+        />
         <NavBar user={user} />
       </div>
       <div className={styles.playlistsContainer}>
