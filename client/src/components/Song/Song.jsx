@@ -1,10 +1,19 @@
-/* eslint-disable react/prop-types */
 import styles from "./Song.module.css";
-import { useState, useEffect, useReducer } from "react";
+import { useState, useEffect, useReducer, useRef } from "react";
 import axios from "axios";
 // import { fetchVideoSong } from "../../services/YouTube_service";
 import { useNavigate } from "react-router";
 import Button from "../Button/Button";
+import YouTube from "react-youtube";
+import propTypes from "prop-types";
+const opts = {
+  height: "300",
+  width: "400",
+  playerVars: {
+    // https://developers.google.com/youtube/player_parameters
+    autoplay: 0,
+  },
+};
 const initialSong = {
   videoId: "",
   title: "",
@@ -14,7 +23,7 @@ const initialSong = {
   error: null,
 };
 function reducer(state, action) {
-  console.log("Reducer action:", action);
+  // console.log("Reducer action:", action);
   switch (action.type) {
     case "LOADING_SONG":
       return {
@@ -41,15 +50,22 @@ function reducer(state, action) {
   }
 }
 
-function Song({ song, user, country = "US" }) {
+function Song({
+  song,
+  user,
+  country = "US",
+  playingVideoId,
+  setPlayingVideoId,
+}) {
   const navigate = useNavigate();
-  console.log("song in Song component:", song);
+  // console.log("song in Song component:", song);
   const songName = song.split(" - ")[1];
   const artist = song.split(" - ")[0];
   const [playlistName, setPlaylistName] = useState("");
   const [options, setOptions] = useState(false);
   const [state, dispatch] = useReducer(reducer, initialSong);
-
+  const playerRef = useRef(null);
+  const [isSongPlaying, setIsSongPlaying] = useState(false);
   // console.log("state", state);
   if (!user.token) {
     navigate("/login");
@@ -119,12 +135,12 @@ function Song({ song, user, country = "US" }) {
     function () {
       async function fetchSongRecommendations(artist, songName) {
         if (!artist || !songName || !user.token) return;
-        console.log(
-          "Fetching song recommendations for:",
-          artist,
-          songName,
-          country
-        );
+        // console.log(
+        //   "Fetching song recommendations for:",
+        //   artist,
+        //   songName,
+        //   country
+        // );
         try {
           const response = await axios.get(
             `http://${
@@ -139,7 +155,7 @@ function Song({ song, user, country = "US" }) {
           );
 
           const data = response.data;
-          console.log("data", data);
+          // console.log("data", data);
 
           dispatch({
             type: "SET_VIDEO_SONG",
@@ -162,6 +178,25 @@ function Song({ song, user, country = "US" }) {
     },
     [artist, songName, user.token, state.videoId, state.regionCode, country]
   );
+
+  useEffect(() => {
+    if (
+      playerRef.current &&
+      playingVideoId &&
+      playingVideoId !== state.videoId
+    ) {
+      try {
+        playerRef.current.pauseVideo();
+        setIsSongPlaying(false);
+      } catch (error) {
+        // ignore if player not ready
+        console.error("Error pausing video:", error);
+      }
+    }
+  }, [playingVideoId, state.videoId, setIsSongPlaying]);
+  function onPlayerReady(event) {
+    playerRef.current = event.target;
+  }
 
   return (
     <div className="homeContainer">
@@ -219,15 +254,31 @@ function Song({ song, user, country = "US" }) {
 
       <>
         {!state.loading && state.videoId ? (
-          <iframe
-            width="400"
-            height="300"
-            src={`https://www.youtube.com/embed/${state.videoId}`}
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
+          <YouTube
+            videoId={state.videoId}
             title={state.title}
-          ></iframe>
+            opts={opts}
+            onReady={onPlayerReady}
+            onPlay={() => {
+              setPlayingVideoId(state.videoId);
+              setIsSongPlaying(true);
+            }}
+            onPause={() => {
+              setIsSongPlaying(false);
+              if (playingVideoId === state.videoId) {
+                setPlayingVideoId(null);
+              }
+            }}
+          />
         ) : (
+          // <iframe
+          //   width="400"
+          //   height="300"
+          //   src={`https://www.youtube.com/embed/${state.videoId}`}
+          //   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          //   allowFullScreen
+          //   title={state.title}
+          // ></iframe>
           <div className={styles.noVideo}>No Video Available</div>
         )}
         {state.loading && <div className={styles.loading}>Loading...</div>}
@@ -236,4 +287,23 @@ function Song({ song, user, country = "US" }) {
     </div>
   );
 }
+
+Song.propTypes = {
+  song: propTypes.string.isRequired,
+  user: propTypes.shape({
+    _id: propTypes.string.isRequired,
+    name: propTypes.string.isRequired,
+    email: propTypes.string.isRequired,
+    token: propTypes.string.isRequired,
+    playlists: propTypes.arrayOf(
+      propTypes.shape({
+        name: propTypes.string,
+      })
+    ),
+  }).isRequired,
+  country: propTypes.string,
+  playingVideoId: propTypes.string,
+  setPlayingVideoId: propTypes.func,
+};
+
 export default Song;
