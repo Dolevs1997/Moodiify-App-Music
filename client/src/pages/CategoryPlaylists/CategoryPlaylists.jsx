@@ -17,7 +17,6 @@ function CategoryPlaylists() {
     ? JSON.parse(localStorage.getItem("user"))
     : null;
   const searchContext = useContext(SearchContext);
-  // console.log("searchContext in CategoryPlaylists:", searchContext);
 
   useEffect(() => {
     document.title = "Moodiify | Category Playlists";
