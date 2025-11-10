@@ -21,6 +21,8 @@ const initialSong = {
   regionCode: "",
   loading: true,
   error: null,
+  playlistId: null,
+  inPlaylist: false,
 };
 function reducer(state, action) {
   // console.log("Reducer action:", action);
@@ -40,6 +42,12 @@ function reducer(state, action) {
         regionCode: action.payload.regionCode,
         loading: false,
       };
+    case "SET_IN_PLAYLIST":
+      return {
+        ...state,
+        inPlaylist: action.payload.inPlaylist,
+        playlistId: action.payload.playlistId,
+      };
     case "SET_ERROR":
       return {
         ...state,
@@ -56,17 +64,17 @@ function Song({
   country = "US",
   playingVideoId,
   setPlayingVideoId,
+  playlistId,
 }) {
   const navigate = useNavigate();
-  // console.log("song in Song component:", song);
   const songName = song.split(" - ")[1];
   const artist = song.split(" - ")[0];
   const [playlistName, setPlaylistName] = useState("");
   const [options, setOptions] = useState(false);
   const [state, dispatch] = useReducer(reducer, initialSong);
   const playerRef = useRef(null);
-  const [isSongPlaying, setIsSongPlaying] = useState(false);
-  // console.log("state", state);
+  const [setIsSongPlaying] = useState(false);
+
   if (!user.token) {
     navigate("/login");
   }
@@ -78,6 +86,38 @@ function Song({
   if (user.playlists.length === 0) {
     user.playlists = [];
   }
+  useEffect(() => {
+    if (!state.videoId || !user || !user.token) return;
+
+    async function findSongInPlaylists() {
+      console.log("Checking if song is in user's playlists...");
+      // 1) quick local check if user.playlists contains song lists
+      if (Array.isArray(user.playlists) && user.playlists.length > 0) {
+        for (const pl of user.playlists) {
+          // support both shapes: pl.songs array or pl.items array
+          const songsList = pl.songs || pl.items || pl.tracks;
+          if (Array.isArray(songsList)) {
+            const found = songsList.find(
+              (s) =>
+                s.videoId === state.videoId ||
+                s.videoId === state.videoId?.toString()
+            );
+            if (found) {
+              dispatch({
+                type: "SET_IN_PLAYLIST",
+                payload: {
+                  inPlaylist: true,
+                  playlistId: pl.id || pl._id || pl.playlistId,
+                },
+              });
+              return;
+            }
+          }
+        }
+      }
+    }
+    findSongInPlaylists();
+  }, [state.videoId, user]);
   async function handleAddSongToPlaylist(playlistName) {
     try {
       const response = await axios.post(
@@ -85,6 +125,7 @@ function Song({
         {
           songName: songName,
           artist: artist,
+          videoId: state.videoId,
           playlistName: playlistName,
           user: user,
         },
@@ -95,14 +136,17 @@ function Song({
           },
         }
       );
-      console.log("response", response.data);
-      console.log("playlist name", response.data.playlist);
 
-      console.log("Song added to playlist successfully!");
       if (!Array.isArray(user.playlists)) {
         user.playlists = [];
       }
-
+      dispatch({
+        type: "SET_IN_PLAYLIST",
+        payload: {
+          inPlaylist: true,
+          playlistId: response.data.playlist._id,
+        },
+      });
       // Check if the playlist already exists
       const existingPlaylist = user.playlists.find(
         (playlist) => playlist.name === response.data.playlist.name
@@ -121,8 +165,6 @@ function Song({
         });
       }
 
-      console.log("user playlists", user.playlists);
-
       localStorage.setItem("user", JSON.stringify(user));
       setOptions(false);
     } catch (error) {
@@ -135,12 +177,7 @@ function Song({
     function () {
       async function fetchSongRecommendations(artist, songName) {
         if (!artist || !songName || !user.token) return;
-        // console.log(
-        //   "Fetching song recommendations for:",
-        //   artist,
-        //   songName,
-        //   country
-        // );
+
         try {
           const response = await axios.get(
             `http://${
@@ -155,7 +192,7 @@ function Song({
           );
 
           const data = response.data;
-          // console.log("data", data);
+          console.log("data", data);
 
           dispatch({
             type: "SET_VIDEO_SONG",
@@ -164,6 +201,7 @@ function Song({
               regionCode: data.regionCode,
               title: data.title,
               artist: data.artist,
+              playlistId: playlistId,
             },
           });
         } catch (error) {
@@ -176,7 +214,15 @@ function Song({
       }
       fetchSongRecommendations(artist, songName);
     },
-    [artist, songName, user.token, state.videoId, state.regionCode, country]
+    [
+      artist,
+      songName,
+      user.token,
+      state.videoId,
+      state.regionCode,
+      country,
+      playlistId,
+    ]
   );
 
   useEffect(() => {
@@ -209,7 +255,7 @@ function Song({
           )
         }
       >
-        ➕
+        {state.inPlaylist ? "Remove from Playlist" : "Add to Playlist"}
         {options && (
           <div className={styles.playlistOptions}>
             <select
@@ -245,6 +291,7 @@ function Song({
             >
               Add Song to Playlist
             </Button>
+            {state.inPlaylist && <Button>Remove from Playlist</Button>}
           </div>
         )}
       </span>
@@ -262,6 +309,9 @@ function Song({
             onPlay={() => {
               setPlayingVideoId(state.videoId);
               setIsSongPlaying(true);
+              console.log("Playing videoId:", state.videoId);
+              console.log("playingVideoId state:", playingVideoId);
+              console.log("playerRef", playerRef);
             }}
             onPause={() => {
               setIsSongPlaying(false);
@@ -271,14 +321,6 @@ function Song({
             }}
           />
         ) : (
-          // <iframe
-          //   width="400"
-          //   height="300"
-          //   src={`https://www.youtube.com/embed/${state.videoId}`}
-          //   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          //   allowFullScreen
-          //   title={state.title}
-          // ></iframe>
           <div className={styles.noVideo}>No Video Available</div>
         )}
         {state.loading && <div className={styles.loading}>Loading...</div>}
@@ -304,6 +346,7 @@ Song.propTypes = {
   country: propTypes.string,
   playingVideoId: propTypes.string,
   setPlayingVideoId: propTypes.func,
+  playlistId: propTypes.string,
 };
 
 export default Song;

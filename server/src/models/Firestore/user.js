@@ -2,6 +2,7 @@ import {
   addDoc,
   collection,
   getDocs,
+  getDoc,
   query,
   where,
   updateDoc,
@@ -36,18 +37,19 @@ const getUser = async (email) => {
   try {
     const userQuery = query(
       collection(db, "user"),
-      where("email", "==", email) // Query to find user by email
+      where("email", "==", email)
     );
     const querySnapshot = await getDocs(userQuery);
     if (querySnapshot.empty) {
       console.log("No user found with this email:", email);
-      return null; // Return null if no user is found
+      return null;
     }
     let userData = null;
     querySnapshot.forEach((doc) => {
       userData = { id: doc.id, ...doc.data() };
     });
-    return userData;
+    const userDocRef = doc(db, "user", userData.id);
+    return userDocRef;
   } catch (error) {
     console.error("Error getting user:", error);
     return { error: "Error getting user" };
@@ -56,20 +58,14 @@ const getUser = async (email) => {
 const updateUser = async (email, newPlaylist, newSong) => {
   const user = await getUser(email);
   if (!user) {
-    console.log("User not found with this email in firestore:", email);
     return { error: "User not found" };
   }
   try {
-    console.log("Updating user:", user.id);
     const userRef = doc(db, "user", user.id);
     // get playlist if it exists
     const existingPlaylist = await getPlaylistUser(newPlaylist.name, userRef);
     // If the playlist already exists, add the song to the existing playlist
     if (existingPlaylist) {
-      console.log(
-        "Playlist already exists for this user in Firestore:",
-        newPlaylist.name
-      );
       // If the playlist already exists, add the song to the existing playlist
 
       const newSongRef = await addSongsUser(newSong, userRef); // Add the new song to Firestore
@@ -93,8 +89,6 @@ const updateUser = async (email, newPlaylist, newSong) => {
       return { error: "Error adding playlist user" };
     }
     // Update the user's playlists with the new playlist reference
-    console.log("Adding new playlist to user:", newPlaylistRef.id);
-    console.log("User reference:", userRef.id);
     await updateDoc(userRef, {
       playlists: arrayUnion(newPlaylistRef), // Add the new playlist reference to the user's playlists
     });

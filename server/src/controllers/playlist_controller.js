@@ -1,10 +1,15 @@
 const PlaylistSchema = require("../schemas/Playlist_schema");
 const UserSchema = require("../schemas/User_schema");
 const SongSchema = require("../schemas/Song_schema");
-const { updateUser } = require("../models/Firestore/user");
+const { updateUser, getUser } = require("../models/Firestore/user");
+const { getPlaylistUser } = require("../models/Firestore/playlistsUser");
 
 const createPlaylist = async (req, res) => {
-  const { songName, artist, playlistName, user } = req.body;
+  const { songName, artist, playlistName, user, videoId } = req.body;
+  console.log("song name:", songName);
+  console.log("artist:", artist);
+  console.log("song videoId:", videoId);
+  let newSong = null;
   try {
     const userId = user._id; // Assuming you have the user ID from the authentication middleware
     let newPlaylist;
@@ -21,33 +26,30 @@ const createPlaylist = async (req, res) => {
       user: userId,
     });
 
-    // Check if the song already exists for the user
-    const existingSong = await SongSchema.findOne({
-      title: songName,
-      artist: artist,
-    });
-    console.log("Existing song :", existingSong);
-    let newSong;
-    if (!existingSong) {
-      // Create a new song if it doesn't exist
-      newSong = new SongSchema({
+    if (existingPlaylist) {
+      console.log("Adding song to existing playlist:", playlistName);
+      // Check if the song already exists
+      const existingSong = await SongSchema.findOne({
         title: songName,
         artist: artist,
       });
-      await newSong.save();
-    }
-    console.log("New song :", newSong);
-    // If the song already exists, use the existing song
-    if (existingSong) {
-      newSong = existingSong; // Use the existing song
-    }
-    // Create a new playlist
-    if (existingPlaylist) {
-      console.log("Adding song to existing playlist:", playlistName);
+      if (!existingSong) {
+        // Create a new song if it doesn't exist
+        newSong = new SongSchema({
+          title: songName,
+          artist: artist,
+          videoId: videoId,
+        });
+        await newSong.save();
+        // console.log("New song created:", newSong);
+      } else {
+        newSong = existingSong;
+        // console.log("Using existing song:", newSong);
+      }
       // If the playlist already exists, add the song to the existing playlist
       if (!existingPlaylist.songs.includes(newSong._id)) {
         console.log(
-          "Song not already in playlist, adding song to existing playlist"
+          "Song is not in playlist, adding song to existing playlist"
         );
         existingPlaylist.songs.push(newSong._id);
         console.log("Existing playlist before saving:", existingPlaylist.songs);
@@ -58,23 +60,45 @@ const createPlaylist = async (req, res) => {
     // If the playlist does not exist, create a new one
     else if (!existingPlaylist) {
       console.log("Creating new playlist:", playlistName);
+      // Check if the song already exists
+      const existingSong = await SongSchema.findOne({
+        title: songName,
+        artist: artist,
+        videoId: videoId,
+      });
+
+      if (!existingSong) {
+        // Create a new song if it doesn't exist
+        newSong = new SongSchema({
+          title: songName,
+          artist: artist,
+          videoId: videoId,
+        });
+        await newSong.save();
+        // console.log("New song created:", newSong);
+      } else {
+        newSong = existingSong;
+        // console.log("Using existing song:", newSong);
+      }
 
       // Create a new playlist
       newPlaylist = new PlaylistSchema({
         name: playlistName,
         user: userId,
-        songs: [newSong._id], // Add the song to the new playlist
+        songs: [newSong._id],
       });
       await newPlaylist.save();
       console.log("New playlist created:", newPlaylist);
       // Add the playlist to the user's playlists
       existingUser.playlists.push(newPlaylist._id); // Add the new playlist to the user's playlists
-      console.log(
-        "User's playlists after adding new playlist:",
-        existingUser.playlists
-      );
+      // console.log(
+      //   "User's playlists after adding new playlist:",
+      //   existingUser.playlists
+      // );
       await existingUser.save();
     }
+
+    console.log("new songs:", newSong);
 
     ///////////////////////////////////
     const firestoreUpdate = await updateUser(
@@ -102,19 +126,50 @@ const createPlaylist = async (req, res) => {
 
 const getPlaylistSongs = async (req, res) => {
   console.log("Getting playlist songs");
-  console.log("Request query:", req.query);
   console.log("Request query ID:", req.query.id);
 
   const playlistId = req.query.id;
-  console.log("Playlist ID:", playlistId);
   try {
+    const playlistObject = await PlaylistSchema.findById(playlistId);
+    // console.log("Playlist object:", playlistObject);
+    if (!playlistObject) {
+      return res.status(404).json({ message: "Playlist not found" });
+    }
+    const userId = playlistObject.user;
+    const userObject = await UserSchema.findById(userId);
+    // console.log("User object:", userObject);
+    if (!userObject) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    const userEmail = userObject.email;
+    const playlistName = playlistObject.name;
+    const userRef = await getUser(userEmail);
+    if (!userRef || userRef.error) {
+      console.error("Error retrieving user from Firestore:", userRef.error);
+      return res.status(500).json({ message: "Error retrieving user data" });
+    }
+    // console.log("User reference from Firestore:", userRef);
+    const firestorePlaylist = await getPlaylistUser(playlistName, userRef);
+    if (!firestorePlaylist || firestorePlaylist.error) {
+      console.error(
+        "Error retrieving playlist from Firestore:",
+        firestorePlaylist.error
+      );
+      return res
+        .status(500)
+        .json({ message: "Error retrieving playlist data" });
+    }
+    // console.log("Firestore playlist:", firestorePlaylist);
     const playlist = await PlaylistSchema.findById(playlistId).populate(
       "songs"
     );
+    console.log("Playlist with populated songs:", playlist);
+
     if (!playlist) {
       return res.status(404).json({ message: "Playlist not found" });
     }
-    res.status(200).json(playlist.songs);
+    const songs = playlist.songs;
+    res.status(200).json({ songs: songs });
   } catch (error) {
     console.error("Error getting playlist songs:", error);
     return res.status(500).json({ message: "Internal server error" });

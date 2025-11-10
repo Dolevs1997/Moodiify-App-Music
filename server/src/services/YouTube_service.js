@@ -7,11 +7,9 @@ async function fetchPlaylists(
   country = "US",
   location = "United States"
 ) {
-  console.log("Fetching playlists for:", playlistName, "in country:", country);
   const controller = new AbortController();
   const signal = controller.signal;
   const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=23&q=${playlistName} ${location} music playlists&regionCode=${country}&type=playlist&key=${API_KEY}`;
-  console.log("Fetching playlists from URL:", url);
   try {
     const response = await fetch(url, { signal });
     const data = await response.json();

@@ -48,18 +48,16 @@ const addPlaylistsUser = async (newPlaylist, newSong, userRef) => {
 
 const getPlaylistUser = async (playlistName, userRef) => {
   try {
+    const playlistRef = collection(db, "playlists-user");
     const playlistQuery = query(
-      collection(db, "playlists-user"),
+      playlistRef,
       where("name", "==", playlistName),
-      where("user", "==", userRef) // Query to find playlist by name and user ID
+      where("user", "==", userRef)
     );
 
+    // console.log("Firestore playlist query:", playlistQuery);
     const querySnapshot = await getDocs(playlistQuery);
     if (querySnapshot.empty) {
-      console.log(
-        "No playlist found with this name for the user:",
-        playlistName
-      );
       return null; // Return null if no playlist is found
     }
     let playlistData = null;

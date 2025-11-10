@@ -29,7 +29,6 @@ export default function Home() {
   const [error, setError] = useState(null);
   // console.log("songSuggestions at home:", songSuggestions);
   // console.log("location at home:", location);
-  console.log("formVisible:", formVisible);
   useEffect(() => {
     document.title = "Moodiify | Home";
   }, []);

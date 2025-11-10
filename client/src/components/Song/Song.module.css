@@ -3,7 +3,7 @@
   cursor: pointer;
 }
 
-.song {
+:global(.song) {
   margin-top: 10px;
   margin-bottom: 20px;
   display: flex;

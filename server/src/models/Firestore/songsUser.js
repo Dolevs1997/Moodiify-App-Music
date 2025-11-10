@@ -26,12 +26,12 @@ const addSongsUser = async (songUser, userRef) => {
       user: userRef, // Store the user reference
     });
 
-    console.log("New song added to user:", {
-      id: docRef.id,
-      artist: songUser.artist,
-      title: songUser.title,
-      user: userRef,
-    });
+    // console.log("New song added to user:", {
+    //   id: docRef.id,
+    //   artist: songUser.artist,
+    //   title: songUser.title,
+    //   user: userRef,
+    // });
 
     return docRef;
   } catch (error) {

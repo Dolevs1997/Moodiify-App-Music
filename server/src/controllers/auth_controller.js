@@ -27,7 +27,6 @@ const register = async (req, res) => {
     });
     // Add user to Firestore
     const firestoreUser = await addUser(username, email);
-    console.log("firestoreUser", firestoreUser.id);
     if (firestoreUser.error) {
       return res.status(409).send("CONFLICT: " + firestoreUser.error);
     }
@@ -55,7 +54,6 @@ const login = async (req, res) => {
   const { email, password } = req.body;
   try {
     const user = await User.findOne({ email: email }).populate("playlists");
-    console.log("user", user);
     if (!user) return res.status(404).send("NOT FOUND: User does not exist");
     const isEmailValid = await userSchemaZod.safeParse({
       name: user.name,
@@ -91,13 +89,11 @@ const login = async (req, res) => {
 // This function is used to logout the user by removing the refresh token from the database
 const logout = async (req, res) => {
   const refreshToken = req.headers["authorization"]?.split(" ")[1];
-  console.log("refreshToken", refreshToken);
   if (!refreshToken) return res.sendStatus(401);
   jwt.verify(
     refreshToken,
     process.env.REFRESH_TOKEN_SECRET,
     async (err, user) => {
-      console.log("user", user);
       if (err) return res.sendStatus(403);
       const foundUser = await User.findById(user.id);
       if (!foundUser) return res.sendStatus(401);

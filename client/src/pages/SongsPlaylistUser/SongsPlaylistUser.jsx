@@ -1,8 +1,9 @@
 import { useParams } from "react-router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Logo from "../../components/Logo/Logo";
 import Search from "../../components/Search/Search";
 import NavBar from "../../components/NavBar/NavBar";
+import Song from "../../components/Song/Song";
 import styles from "./SongsPlaylistUser.module.css";
 import { useLocation } from "react-router";
 import PropTypes from "prop-types";
@@ -19,18 +20,14 @@ function SongsPlaylistUser() {
   let playlist =
     location.state?.playlist ||
     user?.playlists?.find((p) => p.id === playlistId);
-  const songs = playlist?.songs || [];
-
+  const [songs, setSongs] = useState([]);
   if (!playlist) {
     console.error("Playlist not found for ID:", playlistId);
-    console.log("playlist", playlist);
   }
   if (!user) {
     console.error("User not found in local storage or state.");
   }
-  console.log("user", user);
   console.log("playlist", playlist);
-  console.log("songs", songs);
 
   useEffect(() => {
     async function fetchPlaylistSongs() {
@@ -46,16 +43,17 @@ function SongsPlaylistUser() {
           }
         );
         if (!response.ok) {
+          setSongs([]);
           throw new Error("Failed to fetch playlist songs");
         }
         const data = await response.json();
-        console.log("Fetched playlist songs:", data);
+        setSongs(data.songs || []);
       } catch (error) {
         console.error("Error fetching playlist songs:", error);
       }
     }
     fetchPlaylistSongs();
-  }, [playlistId, user.token]);
+  }, [playlistId, user.token, songs.length]);
   return (
     <div className={styles.container}>
       <section className="header">
@@ -64,14 +62,22 @@ function SongsPlaylistUser() {
         <NavBar user={user} />
       </section>
       <h1>{playlist.name} Playlist</h1>
-      <div>
-        {songs.map((song, index) => (
-          <div key={index}>
-            <h2>{song.title}</h2>
-            <p>{song.artist}</p>
-          </div>
-        ))}
-      </div>
+      {songs.length > 0 ? (
+        <div className={styles.songsList}>
+          {songs.map((song, index) => (
+            <Song
+              key={index}
+              song={song.artist + " - " + song.title}
+              user={user}
+              playingVideoId={null}
+              setPlayingVideoId={() => {}}
+              playlistId={playlist._id}
+            />
+          ))}
+        </div>
+      ) : (
+        <p>No songs found in this playlist.</p>
+      )}
     </div>
   );
 }

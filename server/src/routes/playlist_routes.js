@@ -16,5 +16,11 @@ router.get(
   validateToken,
   playlistController.getPlaylistSongs
 );
+// router.get(
+//   "/:videoId",
+//   authenticate,
+//   validateToken,
+//   playlistController.checkSongInPlaylist
+// );
 
 module.exports = router;

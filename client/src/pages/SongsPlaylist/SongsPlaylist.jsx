@@ -17,7 +17,7 @@ function SongsPlaylist() {
     ? JSON.parse(localStorage.getItem("user"))
     : null;
   // console.log("playlist", playlist);
-  console.log("SearchContext in SongsPlaylist:", searchContext);
+  // console.log("SearchContext in SongsPlaylist:", searchContext);
   useEffect(() => {
     const fetchPlaylist = async () => {
       try {
