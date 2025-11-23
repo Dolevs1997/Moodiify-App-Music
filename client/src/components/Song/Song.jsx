@@ -1,17 +1,18 @@
 import styles from "./Song.module.css";
 import { useState, useEffect, useReducer, useRef } from "react";
-import axios from "axios";
-// import { fetchVideoSong } from "../../services/YouTube_service";
 import { useNavigate } from "react-router";
 import Button from "../Button/Button";
 import YouTube from "react-youtube";
 import propTypes from "prop-types";
+import { fetchSongYT } from "../../services/YouTube_service";
+import { addSongToPlaylist } from "../../utils/playlist";
 const opts = {
   height: "300",
   width: "400",
   playerVars: {
     // https://developers.google.com/youtube/player_parameters
-    autoplay: 0,
+    autoplay: 1,
+    color: "white",
   },
 };
 const initialSong = {
@@ -24,6 +25,7 @@ const initialSong = {
   playlistId: null,
   inPlaylist: false,
 };
+// let render = 0;
 function reducer(state, action) {
   // console.log("Reducer action:", action);
   switch (action.type) {
@@ -67,14 +69,15 @@ function Song({
   playlistId,
 }) {
   const navigate = useNavigate();
-  const songName = song.split(" - ")[1];
-  const artist = song.split(" - ")[0];
+  // const songName = song.split(" - ")[1];
+  // const artist = song.split(" - ")[0];
   const [playlistName, setPlaylistName] = useState("");
   const [options, setOptions] = useState(false);
   const [state, dispatch] = useReducer(reducer, initialSong);
   const playerRef = useRef(null);
   const [setIsSongPlaying] = useState(false);
-
+  const songRef = useRef(null);
+  // console.log("song: ", song);
   if (!user.token) {
     navigate("/login");
   }
@@ -86,82 +89,32 @@ function Song({
   if (user.playlists.length === 0) {
     user.playlists = [];
   }
-  useEffect(() => {
-    if (!state.videoId || !user || !user.token) return;
 
-    async function findSongInPlaylists() {
-      console.log("Checking if song is in user's playlists...");
-      // 1) quick local check if user.playlists contains song lists
-      if (Array.isArray(user.playlists) && user.playlists.length > 0) {
-        for (const pl of user.playlists) {
-          // support both shapes: pl.songs array or pl.items array
-          const songsList = pl.songs || pl.items || pl.tracks;
-          if (Array.isArray(songsList)) {
-            const found = songsList.find(
-              (s) =>
-                s.videoId === state.videoId ||
-                s.videoId === state.videoId?.toString()
-            );
-            if (found) {
-              dispatch({
-                type: "SET_IN_PLAYLIST",
-                payload: {
-                  inPlaylist: true,
-                  playlistId: pl.id || pl._id || pl.playlistId,
-                },
-              });
-              return;
-            }
-          }
-        }
-      }
-    }
-    findSongInPlaylists();
-  }, [state.videoId, user]);
   async function handleAddSongToPlaylist(playlistName) {
+    const data = await addSongToPlaylist(song, state, playlistName, user);
     try {
-      const response = await axios.post(
-        `http://${import.meta.env.VITE_SERVER_URL}/moodiify/playlist/create`,
-        {
-          songName: songName,
-          artist: artist,
-          videoId: state.videoId,
-          playlistName: playlistName,
-          user: user,
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${user.token}`,
-          },
-        }
-      );
-
-      if (!Array.isArray(user.playlists)) {
-        user.playlists = [];
-      }
       dispatch({
         type: "SET_IN_PLAYLIST",
         payload: {
           inPlaylist: true,
-          playlistId: response.data.playlist._id,
+          playlistId: data.playlist._id,
         },
       });
       // Check if the playlist already exists
       const existingPlaylist = user.playlists.find(
-        (playlist) => playlist.name === response.data.playlist.name
+        (playlist) => playlist.name === data.playlist.name
       );
       if (existingPlaylist) {
         // If it exists, update the playlist ID
         user.playlists = user.playlists.map((playlist) =>
-          playlist.name === response.data.playlist.name
-            ? { ...playlist, id: response.data.playlist._id }
+          playlist.name === data.playlist.name
+            ? { ...playlist, id: data.playlist._id }
             : playlist
         );
       } else {
         user.playlists.push({
-          id: response.data.playlist._id,
-          name: response.data.playlist.name,
+          id: data.playlist._id,
+          name: data.playlist.name,
         });
       }
 
@@ -175,25 +128,33 @@ function Song({
 
   useEffect(
     function () {
-      async function fetchSongRecommendations(artist, songName) {
-        if (!artist || !songName || !user.token) return;
+      async function fetchSong(song, user, country) {
+        if (!song || !user.token) return;
+        // if we already cached the resolved song and state already set -> do nothing
+        if (songRef.current && state.videoId === songRef.current.videoId) {
+          // nothing to do
+          return;
+        }
+        if (songRef.current) {
+          console.log("Using cached song data");
+          dispatch({
+            type: "SET_VIDEO_SONG",
+            payload: {
+              videoId: songRef.current.videoId,
+              regionCode: songRef.current.regionCode,
+              title: songRef.current.title,
+              artist: songRef.current.artist,
+              playlistId: playlistId,
+            },
+          });
+          return;
+        }
+        // console.log("rendering: ", (render += 1));
 
         try {
-          const response = await axios.get(
-            `http://${
-              import.meta.env.VITE_SERVER_URL
-            }/moodiify/recommends/?artist=${artist}&songName=${songName}&country=${country}`,
-            {
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${user.token}`,
-              },
-            }
-          );
-
-          const data = response.data;
+          const data = await fetchSongYT(song, country, user);
           console.log("data", data);
-
+          songRef.current = data;
           dispatch({
             type: "SET_VIDEO_SONG",
             payload: {
@@ -212,17 +173,9 @@ function Song({
           });
         }
       }
-      fetchSongRecommendations(artist, songName);
+      fetchSong(song, user, country);
     },
-    [
-      artist,
-      songName,
-      user.token,
-      state.videoId,
-      state.regionCode,
-      country,
-      playlistId,
-    ]
+    [song, user, country, state.videoId, playlistId]
   );
 
   useEffect(() => {
@@ -296,11 +249,11 @@ function Song({
         )}
       </span>
       <span className={styles.songDetails}>
-        {artist} - {songName}
+        {/* {artist} - {songName} */}
+        {song}
       </span>
-
-      <>
-        {!state.loading && state.videoId ? (
+      {/* <>
+        {state.videoId ? (
           <YouTube
             videoId={state.videoId}
             title={state.title}
@@ -325,7 +278,47 @@ function Song({
         )}
         {state.loading && <div className={styles.loading}>Loading...</div>}
         {state.error && <div className={styles.error}>{state.error}</div>}
-      </>
+      </> */}
+
+      {state.videoId ? (
+        // lazy-mount player only for the active/playing song to avoid multiple iframe loads
+        playingVideoId === state.videoId ? (
+          <YouTube
+            videoId={state.videoId}
+            title={state.title}
+            opts={opts}
+            onReady={onPlayerReady}
+            onPlay={() => {
+              setPlayingVideoId(state.videoId);
+              setIsSongPlaying(true);
+            }}
+            onPause={() => {
+              setIsSongPlaying(false);
+              if (playingVideoId === state.videoId) {
+                setPlayingVideoId(null);
+              }
+            }}
+          />
+        ) : (
+          // lightweight preview: thumbnail + play button
+          <div className={styles.preview}>
+            <img
+              src={`https://img.youtube.com/vi/${state.videoId}/hqdefault.jpg`}
+              alt={state.title}
+              className={styles.thumbnail}
+              loading="lazy"
+              onClick={() => {
+                console.log("Clicked to play videoId:", state.videoId);
+                setPlayingVideoId(state.videoId);
+              }}
+            />
+          </div>
+        )
+      ) : (
+        <div className={styles.noVideo}>No Video Available</div>
+      )}
+      {state.loading && <div className={styles.loading}>Loading...</div>}
+      {state.error && <div className={styles.error}>{state.error}</div>}
     </div>
   );
 }

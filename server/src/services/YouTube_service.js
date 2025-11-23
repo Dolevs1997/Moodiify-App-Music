@@ -1,6 +1,40 @@
 const dotenv = require("dotenv");
+const { getCachedSong, setCachedSong } = require("./Redis_service");
 dotenv.config();
 const API_KEY = process.env.YOUTUBE_API_KEY;
+
+async function fetchSong(song, country = "US") {
+  const controller = new AbortController();
+  const signal = controller.signal;
+  const cachedSong = await getCachedSong(song, country);
+  if (cachedSong) {
+    console.log("Returning cached song:", cachedSong);
+    return cachedSong;
+  }
+  const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&regionCode=${country}&q=${encodeURIComponent(
+    `${song}`
+  )}&type=video&key=${API_KEY}`;
+  try {
+    const response = await fetch(url, { signal });
+    const data = await response.json();
+    // console.log("Video data:", data);
+    if (data.items.length === 0) {
+      throw new Error("No videos found for the given artist and songName");
+    }
+    const videoId = data.items[0].id.videoId;
+    await setCachedSong(song, country, {
+      title: data.items[0].snippet.title,
+      videoId: videoId,
+    });
+    return {
+      title: data.items[0].snippet.title,
+      videoId: videoId,
+    };
+  } catch (error) {
+    console.error("Error fetching songs:", error);
+    throw new Error("Failed to fetch songs");
+  }
+}
 
 async function fetchPlaylists(
   playlistName,
@@ -58,4 +92,5 @@ async function fetchPlaylistSongs(playlistId) {
 module.exports = {
   fetchPlaylists,
   fetchPlaylistSongs,
+  fetchSong,
 };

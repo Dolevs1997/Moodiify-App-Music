@@ -64,3 +64,13 @@
   text-align: center;
   margin-top: 5px;
 }
+
+.thumbnail {
+  width: 100%;
+  cursor: pointer;
+}
+
+.thumbnail:hover {
+  transform: scale(1.02);
+  transition: transform 0.3s ease;
+}

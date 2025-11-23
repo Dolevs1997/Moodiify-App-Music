@@ -1,25 +1,18 @@
 import axios from "axios";
 
-const SERVER_URL = import.meta.env.VITE_SERVER_URL;
+async function fetchSongYT(song, country, user) {
+  const response = await axios.get(
+    `http://${
+      import.meta.env.VITE_SERVER_URL
+    }/moodiify/recommends/?song=${song}&country=${country}`,
+    {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${user.token}`,
+      },
+    }
+  );
+  return response.data;
+}
 
-const fetchVideoSong = async (videoId, regionCode, token) => {
-  try {
-    const response = await axios.get(
-      `http://${SERVER_URL}/moodiify/videoSong/?videoId=${videoId}&regionCode=${regionCode}`,
-      {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
-    const data = response.data;
-    // console.log("Fetched video song data:", data);
-    return data;
-  } catch (error) {
-    console.error("Error fetching video song:", error);
-    throw error;
-  }
-};
-
-export { fetchVideoSong };
+export { fetchSongYT };

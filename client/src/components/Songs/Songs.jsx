@@ -4,19 +4,22 @@ import { useState } from "react";
 import propTypes from "prop-types";
 function Songs({ songSuggestions, user }) {
   const [playingVideoId, setPlayingVideoId] = useState(null);
+  const [playbackPositions, setPlaybackPositions] = useState({});
   return (
     <div>
       {songSuggestions.length > 1 ? (
         <div className={styles.boxSongs}>
           <h2>Song Suggestions</h2>
           <ul>
-            {songSuggestions.map((song, index) => (
+            {songSuggestions.map((song) => (
               <Song
-                key={index}
+                key={song}
                 song={song}
                 user={user}
                 playingVideoId={playingVideoId}
                 setPlayingVideoId={setPlayingVideoId}
+                playbackPositions={playbackPositions}
+                setPlaybackPositions={setPlaybackPositions}
               />
             ))}
           </ul>
@@ -29,6 +32,8 @@ function Songs({ songSuggestions, user }) {
             user={user}
             playingVideoId={playingVideoId}
             setPlayingVideoId={setPlayingVideoId}
+            playbackPositions={playbackPositions}
+            setPlaybackPositions={setPlaybackPositions}
           />
         </div>
       )}

@@ -1,11 +1,11 @@
 // import styles from "./SongsPlaylist.module.css";
 import { useParams, useLocation } from "react-router";
 import { useEffect, useState, useContext } from "react";
-import Song from "../../components/Song/Song";
 import Logo from "../../components/Logo/Logo";
 import Search from "../../components/Search/Search";
 import NavBar from "../../components/NavBar/NavBar";
 import { SearchContext } from "../../Contexts/SearchContext";
+import Song from "../../components/Song/Song";
 // import { useNavigate } from "react-router-dom";
 function SongsPlaylist() {
   const { playlistId } = useParams();
@@ -16,6 +16,9 @@ function SongsPlaylist() {
   const user = localStorage.getItem("user")
     ? JSON.parse(localStorage.getItem("user"))
     : null;
+  const [playingVideoId, setPlayingVideoId] = useState(null);
+  const [playbackPositions, setPlaybackPositions] = useState({});
+
   // console.log("playlist", playlist);
   // console.log("SearchContext in SongsPlaylist:", searchContext);
   useEffect(() => {
@@ -38,6 +41,7 @@ function SongsPlaylist() {
         }
         const data = await response.json();
         setPlaylist(data);
+        // console.log("Fetched playlist data:", data);
       } catch (error) {
         console.error("Error fetching playlist:", error);
       }
@@ -67,16 +71,19 @@ function SongsPlaylist() {
       <div className="playlist-songs">
         {playlist.length > 0 ? (
           <ul className="songsContainer">
-            {playlist
-              .filter((song) => song.title.includes("-"))
-              .map((song, index) => (
-                <Song
-                  song={song.title}
-                  user={user}
-                  key={index}
-                  country={location.state.country}
-                />
-              ))}
+            {playlist.map((song, index) => (
+              <Song
+                key={index}
+                song={song.title}
+                user={user}
+                country={location.state.country}
+                playingVideoId={playingVideoId}
+                setPlayingVideoId={setPlayingVideoId}
+                playlistId={playlistId}
+                playbackPositions={playbackPositions}
+                setPlaybackPositions={setPlaybackPositions}
+              />
+            ))}
           </ul>
         ) : (
           <p>No songs found in this playlist.</p>

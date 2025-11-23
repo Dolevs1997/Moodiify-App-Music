@@ -10,6 +10,7 @@ const authRouter = require("./src/routes/Auth_routes");
 const playlistRouter = require("./src/routes/playlist_routes");
 const cors = require("cors");
 const { json, urlencoded } = require("body-parser");
+const { connectRedis } = require("./src/services/Redis_service");
 const dotenv = require("dotenv");
 dotenv.config();
 
@@ -22,6 +23,8 @@ const initApp = async () => {
     const db = mongoose.connection;
     db.on("error", (error) => console.error(error));
     db.once("connected", () => console.log("Connected to MongoDB"));
+    // Connect to Redis
+    await connectRedis();
     // Initialize Express app
     const app = express();
     app.use(cors()); // Enable CORS for all routes
