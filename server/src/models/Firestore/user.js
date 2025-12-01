@@ -41,7 +41,7 @@ const getUser = async (email) => {
     );
     const querySnapshot = await getDocs(userQuery);
     if (querySnapshot.empty) {
-      console.log("No user found with this email:", email);
+      // console.log("No user found with this email:", email);
       return null;
     }
     let userData = null;
@@ -57,6 +57,7 @@ const getUser = async (email) => {
 };
 const updateUser = async (email, newPlaylist, newSong) => {
   const user = await getUser(email);
+  // console.log("newSong in updateUser:", newSong);
   if (!user) {
     return { error: "User not found" };
   }

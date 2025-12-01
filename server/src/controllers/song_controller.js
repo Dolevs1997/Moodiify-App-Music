@@ -9,15 +9,14 @@ const PlaylistSchema = require("../schemas/Playlist_schema"); // Import the Play
 const fs = require("fs");
 
 const getById = async (req, res) => {
+  // console.log("GetById called with query:", req.query);
   const { id } = req.query;
   if (!id) {
     return res.status(400).json({ error: "Please provide id in query params" });
   }
   try {
     const song = await SongSchema.findOne({ videoId: id });
-    if (!song) {
-      return res.status(404).json({ error: "Song not found" });
-    }
+    // console.log("Fetched song by ID:", song);
     res.status(200).json(song);
   } catch (err) {
     console.error("Error fetching song by ID:", err);

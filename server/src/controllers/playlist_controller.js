@@ -5,10 +5,10 @@ const { updateUser, getUser } = require("../models/Firestore/user");
 const { getPlaylistUser } = require("../models/Firestore/playlistsUser");
 
 const createPlaylist = async (req, res) => {
-  const { songName, artist, playlistName, user, videoId } = req.body;
-  console.log("song name:", songName);
-  console.log("artist:", artist);
+  const { song, playlistName, user, videoId } = req.body;
+  console.log("song", song);
   console.log("song videoId:", videoId);
+  console.log("user", user);
   let newSong = null;
   try {
     const userId = user._id; // Assuming you have the user ID from the authentication middleware
@@ -27,17 +27,15 @@ const createPlaylist = async (req, res) => {
     });
 
     if (existingPlaylist) {
-      console.log("Adding song to existing playlist:", playlistName);
+      // console.log("Adding song to existing playlist:", playlistName);
       // Check if the song already exists
       const existingSong = await SongSchema.findOne({
-        title: songName,
-        artist: artist,
+        song: song,
       });
       if (!existingSong) {
         // Create a new song if it doesn't exist
         newSong = new SongSchema({
-          title: songName,
-          artist: artist,
+          song: song,
           videoId: videoId,
         });
         await newSong.save();
@@ -51,7 +49,7 @@ const createPlaylist = async (req, res) => {
         console.log(
           "Song is not in playlist, adding song to existing playlist"
         );
-        existingPlaylist.songs.push(newSong._id);
+        existingPlaylist.songs.push(newSong);
         console.log("Existing playlist before saving:", existingPlaylist.songs);
         await existingPlaylist.save();
         console.log("Existing playlist after saving:", existingPlaylist.songs);
@@ -59,19 +57,17 @@ const createPlaylist = async (req, res) => {
     }
     // If the playlist does not exist, create a new one
     else if (!existingPlaylist) {
-      console.log("Creating new playlist:", playlistName);
+      // console.log("Creating new playlist:", playlistName);
       // Check if the song already exists
       const existingSong = await SongSchema.findOne({
-        title: songName,
-        artist: artist,
+        song: song,
         videoId: videoId,
       });
 
       if (!existingSong) {
         // Create a new song if it doesn't exist
         newSong = new SongSchema({
-          title: songName,
-          artist: artist,
+          song: song,
           videoId: videoId,
         });
         await newSong.save();
@@ -88,17 +84,17 @@ const createPlaylist = async (req, res) => {
         songs: [newSong._id],
       });
       await newPlaylist.save();
-      console.log("New playlist created:", newPlaylist);
+      // console.log("New playlist created:", newPlaylist);
       // Add the playlist to the user's playlists
       existingUser.playlists.push(newPlaylist._id); // Add the new playlist to the user's playlists
-      // console.log(
-      //   "User's playlists after adding new playlist:",
-      //   existingUser.playlists
-      // );
+      console.log(
+        "User's playlists after adding new playlist:",
+        existingUser.playlists
+      );
       await existingUser.save();
     }
 
-    console.log("new songs:", newSong);
+    // console.log("new songs:", newSong);
 
     ///////////////////////////////////
     const firestoreUpdate = await updateUser(

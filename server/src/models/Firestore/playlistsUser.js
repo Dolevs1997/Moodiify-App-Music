@@ -25,15 +25,14 @@ const addPlaylistsUser = async (newPlaylist, newSong, userRef) => {
       return { error: "Song does not exist in Firestore" };
     }
 
-    // Log the new song reference for debugging
-    console.log("New song reference:", newSongRef.id);
-    console.log("New song data:", docSnap.data());
+    // // Log the new song reference for debugging
+    // console.log("New song reference:", newSongRef.id);
+    // console.log("New song data:", docSnap.data());
 
-    console.log("Adding song to playlist:", {
-      title: newSongRef.title,
-      artist: newSongRef.artist,
-      user: userRef,
-    });
+    // console.log("Adding song to playlist:", {
+    //   song: newSongRef.song,
+    //   user: userRef,
+    // });
     const docRef = await addDoc(collection(db, "playlists-user"), {
       name: newPlaylist.name,
       user: userRef,

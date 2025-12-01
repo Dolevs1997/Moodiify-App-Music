@@ -17,8 +17,7 @@ const opts = {
 };
 const initialSong = {
   videoId: "",
-  title: "",
-  artist: "",
+  song: "",
   regionCode: "",
   loading: true,
   error: null,
@@ -39,8 +38,7 @@ function reducer(state, action) {
       return {
         ...state,
         videoId: action.payload.videoId,
-        title: action.payload.title,
-        artist: action.payload.artist,
+        song: action.payload.song,
         regionCode: action.payload.regionCode,
         loading: false,
       };
@@ -69,15 +67,12 @@ function Song({
   playlistId,
 }) {
   const navigate = useNavigate();
-  // const songName = song.split(" - ")[1];
-  // const artist = song.split(" - ")[0];
   const [playlistName, setPlaylistName] = useState("");
   const [options, setOptions] = useState(false);
   const [state, dispatch] = useReducer(reducer, initialSong);
   const playerRef = useRef(null);
   const [setIsSongPlaying] = useState(false);
   const songRef = useRef(null);
-  // console.log("song: ", song);
   if (!user.token) {
     navigate("/login");
   }
@@ -91,11 +86,15 @@ function Song({
   }
 
   async function handleAddSongToPlaylist(playlistName) {
+    console.log("user in handleAddSongToPlaylist:", user);
     const data = await addSongToPlaylist(song, state, playlistName, user);
+    console.log("data: ", data);
     try {
       dispatch({
         type: "SET_IN_PLAYLIST",
         payload: {
+          videoId: data.videoId,
+          song: data.song,
           inPlaylist: true,
           playlistId: data.playlist._id,
         },
@@ -125,7 +124,7 @@ function Song({
     }
     setPlaylistName("");
   }
-
+  // console.log("playlistId: ", state.playlistId);
   useEffect(
     function () {
       async function fetchSong(song, user, country) {
@@ -142,8 +141,7 @@ function Song({
             payload: {
               videoId: songRef.current.videoId,
               regionCode: songRef.current.regionCode,
-              title: songRef.current.title,
-              artist: songRef.current.artist,
+              song: songRef.current.song,
               playlistId: playlistId,
             },
           });
@@ -153,15 +151,15 @@ function Song({
 
         try {
           const data = await fetchSongYT(song, country, user);
-          console.log("data", data);
+          // console.log("data", data);
           songRef.current = data;
+
           dispatch({
             type: "SET_VIDEO_SONG",
             payload: {
               videoId: data.videoId,
               regionCode: data.regionCode,
-              title: data.title,
-              artist: data.artist,
+              song: data.song,
               playlistId: playlistId,
             },
           });
@@ -175,7 +173,7 @@ function Song({
       }
       fetchSong(song, user, country);
     },
-    [song, user, country, state.videoId, playlistId]
+    [song, user, country, state, playlistId]
   );
 
   useEffect(() => {
@@ -196,7 +194,51 @@ function Song({
   function onPlayerReady(event) {
     playerRef.current = event.target;
   }
+  // console.log("playlist id:", playlistId);
+  useEffect(
+    function () {
+      async function checkSongInPlaylist() {
+        // console.log("state song:", state.videoId);
+        if (!state.videoId) return;
+        const response = await fetch(
+          `http://${
+            import.meta.env.VITE_SERVER_URL
+          }/moodiify/videoSong/song/?id=${state.videoId}`,
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${user.token}`,
+            },
+          }
+        );
+        const data = await response.json();
 
+        if (data) {
+          // console.log("data:", data);
+          // console.log("state", state);
+          if (state.videoId === data.videoId) {
+            dispatch({
+              type: "SET_IN_PLAYLIST",
+              payload: {
+                inPlaylist: true,
+                playlistId: data.playlistId,
+              },
+            });
+          }
+        } else {
+          dispatch({
+            type: "SET_IN_PLAYLIST",
+            payload: {
+              inPlaylist: false,
+            },
+          });
+        }
+        // console.log("checkSongInPlaylist response data:", data);
+      }
+      checkSongInPlaylist();
+    },
+    [state.videoId, user.token]
+  );
   return (
     <div className="homeContainer">
       <span
@@ -252,33 +294,6 @@ function Song({
         {/* {artist} - {songName} */}
         {song}
       </span>
-      {/* <>
-        {state.videoId ? (
-          <YouTube
-            videoId={state.videoId}
-            title={state.title}
-            opts={opts}
-            onReady={onPlayerReady}
-            onPlay={() => {
-              setPlayingVideoId(state.videoId);
-              setIsSongPlaying(true);
-              console.log("Playing videoId:", state.videoId);
-              console.log("playingVideoId state:", playingVideoId);
-              console.log("playerRef", playerRef);
-            }}
-            onPause={() => {
-              setIsSongPlaying(false);
-              if (playingVideoId === state.videoId) {
-                setPlayingVideoId(null);
-              }
-            }}
-          />
-        ) : (
-          <div className={styles.noVideo}>No Video Available</div>
-        )}
-        {state.loading && <div className={styles.loading}>Loading...</div>}
-        {state.error && <div className={styles.error}>{state.error}</div>}
-      </> */}
 
       {state.videoId ? (
         // lazy-mount player only for the active/playing song to avoid multiple iframe loads

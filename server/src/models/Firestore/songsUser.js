@@ -11,18 +11,14 @@ import {
 import { db } from "../../config/firebase_config.js";
 
 const addSongsUser = async (songUser, userRef) => {
-  const existingSong = await getSongUser(
-    songUser.title,
-    songUser.artist,
-    userRef
-  );
+  const existingSong = await getSongUser(songUser.song, userRef);
   if (existingSong) {
     return existingSong; // Return the existing song if it already exists
   }
   try {
     const docRef = await addDoc(collection(db, "songs-user"), {
-      artist: songUser.artist,
-      title: songUser.title,
+      song: songUser.song,
+      videoId: songUser.videoId,
       user: userRef, // Store the user reference
     });
 
@@ -39,17 +35,16 @@ const addSongsUser = async (songUser, userRef) => {
   }
 };
 
-const getSongUser = async (songName, artist, userRef) => {
+const getSongUser = async (song, userRef) => {
   try {
     const songQuery = query(
       collection(db, "songs-user"),
-      where("title", "==", songName),
-      where("artist", "==", artist),
+      where("song", "==", song),
       where("user", "==", userRef) // Query to find song by name, artist, and user ID
     );
     const querySnapshot = await getDocs(songQuery);
     if (querySnapshot.empty) {
-      console.log("No song found with this name for the user:", songName);
+      console.log("No song found with this name for the user:", song);
       return null; // Return null if no song is found
     }
     const existingSongRef = querySnapshot.docs[0].ref; // Get the first document reference
